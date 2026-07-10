@@ -57,3 +57,217 @@ function showLoading() {
         box.style.display = "flex";
     }
 }
+// ===========================
+// Verpackungsetiketten
+// ===========================
+
+function getLabelRows() {
+    return Array.from(document.querySelectorAll("#labelDeviceTable tr"));
+}
+
+function updateStartPosition() {
+
+    const cols = Number(document.getElementById("labelCols").value);
+    const rows = Number(document.getElementById("labelRows").value);
+
+    const select = document.getElementById("startPosition");
+
+    if (!select) return;
+
+    const old = select.value;
+
+    select.innerHTML = "";
+
+    for (let i = 1; i <= cols * rows; i++) {
+
+        const option = document.createElement("option");
+
+        option.value = i;
+        option.text = i;
+
+        if (String(i) === old)
+            option.selected = true;
+
+        select.appendChild(option);
+    }
+
+    if (!select.value)
+        select.value = 1;
+
+    updateLabelSummary();
+}
+
+
+function filterLabelDevices() {
+
+    const search =
+        document
+            .getElementById("labelDeviceSearch")
+            .value
+            .toLowerCase();
+
+    const area =
+        document
+            .getElementById("labelAreaFilter")
+            .value;
+
+    const line =
+        document
+            .getElementById("labelLineFilter")
+            .value;
+
+    getLabelRows().forEach(row => {
+
+        let visible = true;
+
+        if (search &&
+            !row.dataset.search.toLowerCase().includes(search))
+            visible = false;
+
+        if (area &&
+            row.dataset.area !== area)
+            visible = false;
+
+        if (line &&
+            row.dataset.line !== line)
+            visible = false;
+
+        row.style.display = visible ? "" : "none";
+
+        if (!visible) {
+            const checkbox = row.querySelector(".label-device-checkbox");
+
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+        }
+
+    });
+
+    updateLabelSummary();
+}
+
+
+function selectAllLabelDevices() {
+
+    document
+        .querySelectorAll(".label-device-checkbox")
+        .forEach(cb => cb.checked = true);
+
+    updateLabelSummary();
+}
+
+
+function clearAllLabelDevices() {
+
+    document
+        .querySelectorAll(".label-device-checkbox")
+        .forEach(cb => cb.checked = false);
+
+    updateLabelSummary();
+}
+
+
+function selectVisibleLabelDevices() {
+
+    clearAllLabelDevices();
+
+    getLabelRows().forEach(row => {
+
+        if (row.style.display !== "none")
+            row.querySelector("input").checked = true;
+
+    });
+
+    updateLabelSummary();
+}
+
+
+function updateLabelSummary() {
+
+    const total =
+        getLabelRows().length;
+
+    const selected =
+        document.querySelectorAll(".label-device-checkbox:checked").length;
+
+    document.getElementById("labelTotalCount").textContent =
+        total;
+
+    document.getElementById("labelSelectedCount").textContent =
+        selected;
+
+    const cols =
+        Number(document.getElementById("labelCols").value);
+
+    const rows =
+        Number(document.getElementById("labelRows").value);
+
+    const start =
+        Number(document.getElementById("startPosition").value);
+
+    const firstPage =
+        cols * rows - (start - 1);
+
+    let pages = 0;
+
+    if (selected > 0) {
+
+        if (selected <= firstPage)
+            pages = 1;
+
+        else
+            pages =
+                1 +
+                Math.ceil(
+                    (selected - firstPage) /
+                    (cols * rows)
+                );
+
+    }
+
+    document.getElementById("labelPageCount").textContent =
+        pages;
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    if (!document.getElementById("labelDeviceSearch"))
+        return;
+
+    updateStartPosition();
+
+    document
+        .getElementById("labelDeviceSearch")
+        .addEventListener("input", filterLabelDevices);
+
+    document
+        .getElementById("labelAreaFilter")
+        .addEventListener("change", filterLabelDevices);
+
+    document
+        .getElementById("labelLineFilter")
+        .addEventListener("change", filterLabelDevices);
+
+    document
+        .querySelectorAll(".label-device-checkbox")
+        .forEach(cb =>
+            cb.addEventListener("change", updateLabelSummary)
+        );
+
+    document
+        .getElementById("labelCols")
+        .addEventListener("input", updateStartPosition);
+
+    document
+        .getElementById("labelRows")
+        .addEventListener("input", updateStartPosition);
+
+    document
+        .getElementById("startPosition")
+        .addEventListener("change", updateLabelSummary);
+
+    updateLabelSummary();
+
+});

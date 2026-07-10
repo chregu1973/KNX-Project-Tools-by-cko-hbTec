@@ -11,4 +11,4 @@ RUN mkdir -p /data/uploads /data/exports
 
 EXPOSE 5000
 
-CMD ["gunicorn", "-w", "1", "--timeout", "180", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "-w", "1", "--timeout", "180", "--access-logfile", "-", "--error-logfile", "-", "--capture-output", "-b", "0.0.0.0:5000", "app:app"]

@@ -328,3 +328,67 @@ input[type=file]{
     from{ transform:rotate(0deg); }
     to{ transform:rotate(360deg); }
 }
+/* ----------------------------- */
+/* Geräteauswahl Verpackungslabel */
+/* ----------------------------- */
+
+.device-filter-bar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+.device-filter-bar input{
+    min-width:280px;
+}
+
+.device-filter-bar select{
+    min-width:120px;
+}
+
+.device-selection-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.device-selection-actions button{
+    min-width:180px;
+}
+
+.device-selection-table-wrap{
+    max-height:420px;
+    overflow:auto;
+    border:1px solid #39485f;
+    border-radius:8px;
+}
+
+.device-selection-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.device-selection-table th,
+.device-selection-table td{
+    padding:8px 10px;
+}
+
+.device-selection-table thead{
+    position:sticky;
+    top:0;
+    background:#1f2937;
+}
+
+.device-selection-table tbody tr:hover{
+    background:#2a3445;
+}
+
+.device-selection-summary{
+    margin-top:15px;
+    display:flex;
+    gap:25px;
+    font-weight:bold;
+}

@@ -32,6 +32,8 @@ def export_packaging_labels(
     show_description=True,
     show_location=True,
     show_serial=False,
+    selected_addresses=None,
+    start_position=1,
 ):
     c = canvas.Canvas(filename, pagesize=A4)
     page_w, page_h = A4
@@ -46,16 +48,29 @@ def export_packaging_labels(
     cols = int(cols)
     rows = int(rows)
     per_page = cols * rows
+    devices = project.devices
 
-    for index, d in enumerate(project.devices):
+    if selected_addresses is not None:
+        selected = set(selected_addresses)
+        devices = [
+            device
+            for device in project.devices
+            if device.address in selected
+        ]
 
-        if index > 0 and index % per_page == 0:
+    start_position = max(1, min(int(start_position), per_page))
+    start_offset = start_position - 1
+
+    for index, d in enumerate(devices):
+
+        slot_index = start_offset + index
+
+        if slot_index > 0 and slot_index % per_page == 0:
             c.showPage()
 
-        page_index = index % per_page
+        page_index = slot_index % per_page
         col = page_index % cols
         row = page_index // cols
-
         x = margin_x + col * (label_w + gap_x)
         y = page_h - margin_y - (row + 1) * label_h - row * gap_y
 

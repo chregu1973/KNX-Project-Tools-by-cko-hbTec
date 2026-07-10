@@ -69,7 +69,7 @@ def labels():
         "labels.html",
         project=project
     )
-@app.route("/export/labels-pdf")
+@app.route("/export/labels-pdf", methods=["POST"])
 def export_labels_pdf():
 
     project = ProjectManager.load()
@@ -77,6 +77,8 @@ def export_labels_pdf():
     if project is None:
         flash("Kein Projekt geladen.")
         return redirect(url_for("index"))
+    selected_addresses = request.form.getlist("device")
+    start_position = request.form.get("start_position", 1)
 
     filename = "/data/exports/verpackungsetiketten.pdf"
 
@@ -84,20 +86,22 @@ def export_labels_pdf():
         project,
         filename,
 
-        label_width=request.args.get("width", 70),
-        label_height=request.args.get("height", 35),
+        label_width=request.form.get("width", 70),
+        label_height=request.form.get("height", 35),
 
-        cols=request.args.get("cols", 3),
-        rows=request.args.get("rows", 8),
+        cols=request.form.get("cols", 3),
+        rows=request.form.get("rows", 8),
 
-        margin_left=request.args.get("margin_left", 0),
-        margin_top=request.args.get("margin_top", 8),
+        margin_left=request.form.get("margin_left", 0),
+        margin_top=request.form.get("margin_top", 8),
 
-        show_address="address" in request.args,
-        show_room="room" in request.args,
-        show_description="description" in request.args,
-        show_location="location" in request.args,
-        show_serial="serial" in request.args,
+        show_address="address" in request.form,
+        show_room="room" in request.form,
+        show_description="description" in request.form,
+        show_location="location" in request.form,
+        show_serial="serial" in request.form,
+        selected_addresses=selected_addresses,
+        start_position=start_position,
     )
 
     return send_file(
