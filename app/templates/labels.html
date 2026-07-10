@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="labels-layout">
+
+    <div class="card labels-settings">
+        <h2>Verpackungsetiketten</h2>
+
+        {% if project %}
+
+        <form action="/export/labels-pdf" method="get">
+
+            <h3>Etikettenbogen</h3>
+
+            <label>Breite mm</label>
+            <input id="labelWidth" name="width" value="70">
+
+            <label>Höhe mm</label>
+            <input id="labelHeight" name="height" value="35">
+
+            <label>Spalten</label>
+            <input id="labelCols" name="cols" value="3">
+
+            <label>Reihen</label>
+            <input id="labelRows" name="rows" value="8">
+
+            <label>Rand links mm</label>
+            <input id="marginLeft" name="margin_left" value="0">
+
+            <label>Rand oben mm</label>
+            <input id="marginTop" name="margin_top" value="8">
+
+            <h3>Inhalt</h3>
+
+            <label><input type="checkbox" name="address" checked> Physikalische Adresse</label>
+            <label><input type="checkbox" name="room" checked> Raum / Verteiler</label>
+            <label><input type="checkbox" name="description" checked> Beschreibung</label>
+            <label><input type="checkbox" name="location" checked> Standortpfad</label>
+
+            <br><br>
+
+            <button type="submit">PDF erzeugen</button>
+
+        </form>
+
+        {% else %}
+
+        <p>Bitte zuerst ein Projekt laden.</p>
+
+        {% endif %}
+    </div>
+
+    {% if project %}
+    <div class="card labels-preview-card">
+
+        <h2>A4 Vorschau</h2>
+        <p style="color:#ff5b5b; margin:0 0 15px 0; font-size:14px; font-weight:bold;">
+              Hinweis: Die Vorschau dient nur zur Orientierung. Die exakten Abmessungen und Ränder werden erst beim Erzeugen des PDF übernommen.
+        </p>
+
+        <div class="a4-preview" id="a4Preview">
+
+            {% for device in project.devices[:24] %}
+
+            <div class="a4-label">
+                <div class="a4-location">{{ device.location }}</div>
+                <div class="a4-address">{{ device.address }}</div>
+                <div class="a4-room">{{ device.room }}</div>
+                <div class="a4-description">{{ device.description }}</div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

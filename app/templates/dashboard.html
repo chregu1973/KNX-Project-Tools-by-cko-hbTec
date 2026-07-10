@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>Projekt öffnen</h2>
+
+    <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="showLoading()">
+
+        <input
+            type="file"
+            name="project"
+            accept=".knxproj"
+            required>
+
+        <button type="submit" id="loadButton">
+    Projekt laden
+    </button>
+
+    <div id="loadingBox" class="loading-box" style="display:none;">
+         <div class="spinner"></div>
+         <div>Projekt wird geladen… bitte warten</div>
+    </div>
+
+    </form>
+
+</div>
+
+
+{% if project %}
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-value">{{ project.device_count }}</div>
+        <div class="stat-title">Geräte</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-value">{{ project.area_count }}</div>
+        <div class="stat-title">Bereiche</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-value">{{ project.line_count }}</div>
+        <div class="stat-title">Linien</div>
+    </div>
+    <div class="stat-card">
+    <div class="stat-value">{{ project.room_count }}</div>
+    <div class="stat-title">Räume</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-value">{{ project.building_count }}</div>
+        <div class="stat-title">Gebäude</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{% if project.backbone %}Ja{% else %}Nein{% endif %}</div>
+        <div class="stat-title">Backbone</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-value">{{ project.ets_version }}</div>
+        <div class="stat-title">ETS-Version</div>
+    </div>
+
+</div>
+<div class="dashboard-grid">
+
+    <div class="card">
+
+        <h2>Projektinformationen</h2>
+
+        <table class="info-table">
+
+            <tr>
+                <td>Projekt</td>
+                <td>{{ project.name }}</td>
+            </tr>
+
+            <tr>
+                <td>Datei</td>
+                <td>{{ project.filename }}</td>
+            </tr>
+
+            <tr>
+                <td>ETS</td>
+                <td>{{ project.ets_version }}</td>
+            </tr>
+
+            <tr>
+                <td>Version</td>
+                <td>{{ project.tool_version }}</td>
+            </tr>
+
+
+        </table>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Herstellerübersicht</h2>
+
+        <table class="info-table">
+           {% for name, count in manufacturers.items() %}
+        <tr>
+        <td>{{ name }}</td>
+        <td>{{ count }}</td>
+        </tr>
+          {% endfor %}
+      </table>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <h2>Erste Geräte</h2>
+
+    <table class="device-table">
+
+        <thead>
+
+        <tr>
+
+            <th>Adresse</th>
+            <th>Raum</th>
+            <th>Beschreibung</th>
+            <th>Seriennummer</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for device in project.devices[:20] %}
+
+        <tr>
+
+            <td>{{ device.address }}</td>
+
+            <td>{{ device.room }}</td>
+
+            <td>{{ device.description }}</td>
+
+            <td>{{ device.serial }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% else %}
+
+<div class="card">
+
+    <h2>Willkommen</h2>
+
+    <p>
+
+        Willkommen bei den <b>KNX Project Tools</b>.
+
+    </p>
+
+    <p>
+
+        Bitte wählen Sie eine ETS5- oder ETS6-Projektdatei aus.
+
+    </p>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

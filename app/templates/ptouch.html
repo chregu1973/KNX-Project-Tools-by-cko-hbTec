@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>Brother P-touch CSV</h2>
+
+    {% if project %}
+
+    <form action="/export/ptouch" method="get">
+
+        <label>Präfix</label><br>
+        <input name="prefix" value="hbTec | IBS">
+
+        <br><br>
+
+        <label>Datum</label><br>
+        <input name="date" value="{{ date }}">
+
+        <br><br>
+
+        <br><br>
+
+         <label>Bereich</label><br>
+         <select name="area">
+         <option value="">Alle Bereiche</option>
+         {% for area in areas %}
+         <option value="{{ area }}">{{ area }}</option>
+         {% endfor %}
+         </select>
+
+         <br><br>
+
+         <label>Linie</label><br>
+         <select name="line">
+         <option value="">Alle Linien</option>
+         {% for line in lines %}
+         <option value="{{ line }}">{{ line }}</option>
+         {% endfor %}
+         </select>
+
+        <div class="ptouch-preview">
+            <div>hbTec | IBS {{ date }}</div>
+            <strong>{{ project.devices[0].address }}</strong>
+        </div>
+
+        <br>
+
+        <button type="submit">Brother CSV erzeugen</button>
+
+    </form>
+
+    {% else %}
+
+    <p>Bitte zuerst ein Projekt laden.</p>
+
+    {% endif %}
+
+</div>
+
+<div class="card">
+
+    <h2>Importanleitung</h2>
+
+    <p>Hier fügen wir später die Anleitung für den Brother P-touch Editor eindie kommt noch, frag einfach cko :)</p>
+
+</div>
+
+{% endblock %}
+

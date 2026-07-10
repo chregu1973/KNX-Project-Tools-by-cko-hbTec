@@ -1,0 +1,10 @@
+services:
+  knx-tools:
+    build: .
+    container_name: knx-tools
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data/uploads:/data/uploads
+      - ./data/exports:/data/exports

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>KNX Project Tools</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+        KNX<br>
+        <span>Project Tools</span>
+    </div>
+
+    <nav>
+
+        <a href="/">🏠 Dashboard</a>
+
+        <a href="#"></a>
+
+        <a href="/addresses">📍 Physikalische Adressen</a>
+
+        <a href="/ptouch">🏷 Brother P-touch</a>
+
+        <a href="/labels">📦 Verpackungsetiketten</a>
+
+        <a href="#">GitHub Projekt</a>
+
+        <a href="#"></a>
+
+        <a href="#"></a>
+
+    </nav>
+
+</div>
+
+
+<div class="content">
+
+    <header>
+
+        <div>
+
+            <header>
+
+    <div>
+
+        <h1>KNX Project Tools</h1>
+
+        <div class="subtitle">
+            ETS5 / ETS6 Projektverwaltung
+        </div>
+
+    </div>
+
+    <div class="user-badge">
+        KNX Project Tools - version 1.0.0
+    </div>
+
+</header>
+
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+
+            <div class="flash">
+
+                {% for msg in messages %}
+
+                    <div class="flash-message">
+                        {{ msg }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+    {% endwith %}
+
+
+    {% block content %}
+    {% endblock %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+
+</html>

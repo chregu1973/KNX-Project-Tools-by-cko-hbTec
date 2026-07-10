@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>Physikalische Adressen</h2>
+
+    {% if project %}
+
+    <input
+        id="search"
+        type="text"
+        placeholder="Suche..."
+        onkeyup="filterTable()">
+
+    <br><br>
+
+    <table class="device-table" id="deviceTable">
+
+        <thead>
+
+        <tr>
+
+            <th>Adresse</th>
+            <th>Raum</th>
+            <th>Beschreibung</th>
+            <th>Seriennummer</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for device in project.devices %}
+
+        <tr>
+
+            <td>{{ device.address }}</td>
+
+            <td>{{ device.room }}</td>
+
+            <td>{{ device.description }}</td>
+
+            <td>{{ device.serial }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+<br>
+
+<div style="margin-top:20px;">
+
+    <a href="/export/csv">
+
+        <button>
+
+            📄 CSV exportieren
+
+        </button>
+
+    </a>
+
+</div>
+
+    {% else %}
+
+    <p>Bitte zuerst ein Projekt laden.</p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
