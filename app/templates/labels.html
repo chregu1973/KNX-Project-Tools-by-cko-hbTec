@@ -1,217 +1,320 @@
 {% extends "base.html" %}
 
+{% block title %}A4-Etiketten · KNX Label Creator{% endblock %}
+
 {% block content %}
+
+<nav class="tool-breadcrumb">
+    <a href="https://toolbox.ckoeppen.ch/">Toolbox</a>
+    <span>›</span>
+    <a href="/">KNX Label Creator</a>
+    <span>›</span>
+    <a href="/label-options">Etiketten</a>
+    <span>›</span>
+    <strong>A4-Etiketten</strong>
+</nav>
+
+<header class="tool-hero labels-v2-hero">
+    <div class="tool-hero-copy">
+        <p class="tool-eyebrow">KNX Label Creator</p>
+        <h1>A4-Etikettenbogen</h1>
+        <p class="tool-description">
+            Geräte filtern, Etiketten auswählen und als druckfertiges PDF ausgeben.
+        </p>
+    </div>
+
+    <div class="tool-actions">
+        <a class="lc-back-button" href="/label-options">← Zur Etikettenauswahl</a>
+    </div>
+</header>
 
 {% if project %}
 
-<form action="/export/labels-pdf" method="post" id="labelsForm">
+<form action="{{ url_for('export_labels_pdf') }}" method="post" enctype="multipart/form-data" id="labelsForm" class="labels-v2-form">
 
-<div class="labels-layout">
+    <div class="labels-v2-layout">
 
-    <div class="card labels-settings">
+        <aside class="labels-v2-sidebar">
 
-        <h2>Verpackungsetiketten</h2>
-
-        <h3>Etikettenbogen</h3>
-
-        <label>Breite mm</label>
-        <input id="labelWidth" name="width" type="number" step="0.1" value="70">
-
-        <label>Höhe mm</label>
-        <input id="labelHeight" name="height" type="number" step="0.1" value="35">
-
-        <label>Spalten</label>
-        <input id="labelCols" name="cols" type="number" min="1" value="3">
-
-        <label>Reihen</label>
-        <input id="labelRows" name="rows" type="number" min="1" value="8">
-
-        <label>Rand links mm</label>
-        <input id="marginLeft" name="margin_left" type="number" step="0.1" value="0">
-
-        <label>Rand oben mm</label>
-        <input id="marginTop" name="margin_top" type="number" step="0.1" value="8">
-
-        <label>Startposition auf dem ersten Bogen</label>
-        <select id="startPosition" name="start_position"></select>
-
-        <small>
-            Beispiel: Position 6 lässt die ersten fünf Etiketten frei.
-        </small>
-
-        <h3>Inhalt</h3>
-
-        <label>
-            <input type="checkbox" name="address" checked>
-            Physikalische Adresse
-        </label>
-
-        <label>
-            <input type="checkbox" name="room" checked>
-            Raum / Verteiler
-        </label>
-
-        <label>
-            <input type="checkbox" name="description" checked>
-            Beschreibung
-        </label>
-
-        <label>
-            <input type="checkbox" name="location" checked>
-            Standortpfad
-        </label>
-
-        <button type="submit" class="labels-pdf-button">
-            PDF erzeugen
-        </button>
-
-    </div>
-
-
-    <div>
-
-        <div class="card labels-device-card">
-
-            <h2>Zu druckende Geräte</h2>
-
-            <div class="device-filter-bar">
-
-                <input
-                    id="labelDeviceSearch"
-                    type="text"
-                    placeholder="Adresse, Raum oder Beschreibung suchen"
-                >
-
-                <select id="labelAreaFilter">
-                    <option value="">Alle Bereiche</option>
-
-                    {% for area in project.areas %}
-                    <option value="{{ area }}">{{ area }}</option>
-                    {% endfor %}
-                </select>
-
-                <select id="labelLineFilter">
-                    <option value="">Alle Linien</option>
-
-                    {% for line in project.lines %}
-                    <option value="{{ line }}">{{ line }}</option>
-                    {% endfor %}
-                </select>
-
-            </div>
-
-            <div class="device-selection-actions">
-
-               <button type="button" onclick="selectAllLabelDevices()">
-                       Alle Geräte auswählen
-            </button>
-
-            <button type="button" onclick="clearAllLabelDevices()">
-                     Alle Geräte abwählen
-            </button>
-
-            <button type="button" onclick="selectVisibleLabelDevices()">
-                     Nur sichtbare Geräte auswählen
-            </button>
-
-            </div>
-
-            <div class="device-selection-table-wrap">
-
-                <table class="device-selection-table">
-
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Adresse</th>
-                            <th>Bereich</th>
-                            <th>Linie</th>
-                            <th>Raum</th>
-                            <th>Beschreibung</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="labelDeviceTable">
-
-                        {% for device in project.devices %}
-
-                        <tr
-                            data-search="{{ device.address }} {{ device.room }} {{ device.description }} {{ device.location }}"
-                            data-area="{{ device.address.split('.')[0] }}"
-                            data-line="{{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}"
-                        >
-                            <td>
-                                <input
-                                    class="label-device-checkbox"
-                                    type="checkbox"
-                                    name="device"
-                                    value="{{ device.address }}"
-                                    
-                                >
-                            </td>
-
-                            <td><strong>{{ device.address }}</strong></td>
-                            <td>{{ device.address.split('.')[0] }}</td>
-                            <td>
-                                {{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}
-                            </td>
-                            <td>{{ device.room }}</td>
-                            <td>{{ device.description }}</td>
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            <div class="device-selection-summary">
-                <span>Geräte gesamt: <strong id="labelTotalCount">0</strong></span>
-                <span>Ausgewählt: <strong id="labelSelectedCount">0</strong></span>
-                <span>Benötigte Seiten: <strong id="labelPageCount">0</strong></span>
-            </div>
-
-        </div>
-
-
-        <div class="card labels-preview-card">
-
-            <h2>A4 Vorschau</h2>
-
-            <p class="preview-warning">
-                Die Vorschau dient nur als Beispiel. Die genauen Masse werden erst im PDF übernommen.
-            </p>
-
-            <div class="a4-preview" id="a4Preview">
-
-                {% for device in project.devices[:24] %}
-
-                <div class="a4-label">
-                    <div class="a4-location">{{ device.location }}</div>
-                    <div class="a4-address">{{ device.address }}</div>
-                    <div class="a4-room">{{ device.room }}</div>
-                    <div class="a4-description">{{ device.description }}</div>
+            <section class="labels-v2-card">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">01 · Format</span>
+                        <h2>Etikettenbogen</h2>
+                    </div>
+                    <span class="labels-v2-badge" id="labelCapacityBadge">24 / Bogen</span>
                 </div>
 
-                {% endfor %}
+                <label class="labels-v2-field labels-v2-field-wide">
+                    <span>Vorlage</span>
+                    <select id="labelPreset">
+                        <option value="avery-3422">Avery Zweckform 3422 · 70 × 35 mm</option>
+                        <option value="avery-6122">Avery Zweckform 6122 · 70 × 36 mm</option>
+                        <option value="avery-3652">Avery Zweckform 3652 · 70 × 42,3 mm</option>
+                        <option value="avery-3653">Avery Zweckform 3653 · 105 × 42,3 mm</option>
+                        <option value="custom">Benutzerdefiniert</option>
+                    </select>
+                    <small>Bei einer Vorlage werden die Bogenmasse automatisch gesetzt.</small>
+                </label>
 
-            </div>
+                <div class="labels-v2-field-grid">
+                    <label class="labels-v2-field">
+                        <span>Breite mm</span>
+                        <input id="labelWidth" name="width" type="number" min="1" max="210" step="0.1" value="70">
+                    </label>
 
-        </div>
+                    <label class="labels-v2-field">
+                        <span>Höhe mm</span>
+                        <input id="labelHeight" name="height" type="number" min="1" max="297" step="0.1" value="35">
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Spalten</span>
+                        <input id="labelCols" name="cols" type="number" min="1" max="20" step="1" value="3">
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Reihen</span>
+                        <input id="labelRows" name="rows" type="number" min="1" max="50" step="1" value="8">
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Rand links mm</span>
+                        <input id="marginLeft" name="margin_left" type="number" min="0" max="210" step="0.1" value="0">
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Rand oben mm</span>
+                        <input id="marginTop" name="margin_top" type="number" min="0" max="297" step="0.1" value="8.5">
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Abstand horizontal mm</span>
+                        <input id="gapX" name="gap_x" type="number" min="0" max="210" step="0.1" value="0">
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Abstand vertikal mm</span>
+                        <input id="gapY" name="gap_y" type="number" min="0" max="297" step="0.1" value="0">
+                    </label>
+                </div>
+
+                <label class="labels-v2-field labels-v2-field-wide">
+                    <span>Startposition auf dem ersten Bogen</span>
+                    <select id="startPosition" name="start_position"></select>
+                    <small>Bereits verwendete Etiketten am Bogenanfang werden übersprungen.</small>
+                </label>
+
+                <div class="labels-v2-format-status" id="labelFormatStatus" role="status"></div>
+            </section>
+
+            <section class="labels-v2-card">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">02 · Inhalt</span>
+                        <h2>Etiketteninhalt</h2>
+                    </div>
+                </div>
+
+                <div class="labels-v2-checks">
+                    <label>
+                        <input class="label-content-toggle" type="checkbox" name="address" data-preview="address" checked>
+                        <span>Physikalische Adresse</span>
+                    </label>
+
+                    <label>
+                        <input class="label-content-toggle" type="checkbox" name="room" data-preview="room" checked>
+                        <span>Raum / Verteiler</span>
+                    </label>
+
+                    <label>
+                        <input class="label-content-toggle" type="checkbox" name="description" data-preview="description" checked>
+                        <span>Beschreibung</span>
+                    </label>
+
+                    <label>
+                        <input class="label-content-toggle" type="checkbox" name="location" data-preview="location" checked>
+                        <span>Standortpfad</span>
+                    </label>
+                </div>
+
+                <div class="labels-v2-logo-upload">
+                    <label class="labels-v2-field labels-v2-field-wide">
+                        <span>Logo (optional)</span>
+                        <input
+                            id="labelLogo"
+                            name="logo"
+                            type="file"
+                            accept="image/png,image/jpeg,.png,.jpg,.jpeg"
+                        >
+                        <small>PNG oder JPG, maximal 2 MB. Ausgabe proportional in einem festen Feld von 18 × 8 mm.</small>
+                    </label>
+
+                    <button type="button" id="clearLabelLogo" hidden>Logo entfernen</button>
+                </div>
+            </section>
+
+            <button type="submit" class="labels-v2-export" id="labelsPdfButton">
+                <span>PDF erzeugen</span>
+                <small id="labelsPdfHint">Zuerst Geräte auswählen</small>
+            </button>
+
+        </aside>
+
+        <main class="labels-v2-main">
+
+            <section class="labels-v2-card labels-v2-devices">
+                <div class="labels-v2-card-head labels-v2-device-head">
+                    <div>
+                        <span class="labels-v2-kicker">03 · Auswahl</span>
+                        <h2>Zu druckende Geräte</h2>
+                    </div>
+
+                    <div class="labels-v2-count-pill">
+                        <strong id="labelSelectedCount">0</strong>
+                        <span>ausgewählt</span>
+                    </div>
+                </div>
+
+                <div class="labels-v2-filter-grid">
+                    <label class="labels-v2-field labels-v2-search">
+                        <span>Suche</span>
+                        <input
+                            id="labelDeviceSearch"
+                            type="search"
+                            placeholder="Adresse, Raum oder Beschreibung"
+                            autocomplete="off"
+                        >
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Bereich</span>
+                        <select id="labelAreaFilter">
+                            <option value="">Alle Bereiche</option>
+                            {% for area in project.areas %}
+                            <option value="{{ area }}">{{ area }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Linie</span>
+                        <select id="labelLineFilter">
+                            <option value="">Alle Linien</option>
+                            {% for line in project.lines %}
+                            <option value="{{ line }}">{{ line }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+
+                <div class="labels-v2-selection-bar">
+                    <div class="labels-v2-actions">
+                        <button type="button" id="selectFilteredLabels">Gefilterte auswählen</button>
+                        <button type="button" id="selectAllLabels">Alle auswählen</button>
+                        <button type="button" id="clearLabelSelection">Auswahl löschen</button>
+                    </div>
+
+                    <span><strong id="labelVisibleCount">0</strong> von <strong id="labelTotalCount">0</strong> Geräten sichtbar</span>
+                </div>
+
+                <div class="labels-v2-table-wrap">
+                    <table class="labels-v2-table">
+                        <thead>
+                            <tr>
+                                <th class="labels-v2-check-col"></th>
+                                <th>Adresse</th>
+                                <th>Bereich</th>
+                                <th>Linie</th>
+                                <th>Raum / Verteiler</th>
+                                <th>Beschreibung</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="labelDeviceTable">
+                            {% for device in project.devices %}
+                            <tr
+                                data-search="{{ device.address }} {{ device.room }} {{ device.description }} {{ device.location }}"
+                                data-address="{{ device.address }}"
+                                data-area="{{ device.address.split('.')[0] }}"
+                                data-line="{{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}"
+                                data-room="{{ device.room }}"
+                                data-description="{{ device.description }}"
+                                data-location="{{ device.location }}"
+                            >
+                                <td class="labels-v2-check-col">
+                                    <input
+                                        class="label-device-checkbox"
+                                        type="checkbox"
+                                        name="device"
+                                        value="{{ device.address }}"
+                                        aria-label="Gerät {{ device.address }} auswählen"
+                                    >
+                                </td>
+                                <td><strong>{{ device.address }}</strong></td>
+                                <td>{{ device.address.split('.')[0] }}</td>
+                                <td>{{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}</td>
+                                <td>{{ device.room or '–' }}</td>
+                                <td>{{ device.description or '–' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="labels-v2-card labels-v2-preview-card">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">04 · Kontrolle</span>
+                        <h2>Beispiel und Bogenbelegung</h2>
+                    </div>
+                    <span class="labels-v2-preview-note">PDF ist druckverbindlich</span>
+                </div>
+
+                <div class="labels-v2-preview-grid">
+                    <div>
+                        <span class="labels-v2-preview-caption">Beispieletikett</span>
+                        <div class="labels-v2-sample" id="labelSample">
+                            <img id="labelPreviewLogo" class="labels-v2-sample-logo" alt="Logo-Vorschau" hidden>
+                            <div class="labels-v2-sample-location" id="labelPreviewLocation">Standortpfad</div>
+                            <div class="labels-v2-sample-address" id="labelPreviewAddress">1.1.1</div>
+                            <div class="labels-v2-sample-room" id="labelPreviewRoom">Raum / Verteiler</div>
+                            <div class="labels-v2-sample-description" id="labelPreviewDescription">Gerätebeschreibung</div>
+                        </div>
+                    </div>
+
+                    <div class="labels-v2-sheet-panel">
+                        <div class="labels-v2-sheet-stats">
+                            <div><strong id="labelPerSheetCount">24</strong><span>Etiketten / Bogen</span></div>
+                            <div><strong id="labelPageCount">0</strong><span>benötigte Bögen</span></div>
+                            <div><strong id="labelFirstPageFree">24</strong><span>freie Plätze ab Start</span></div>
+                        </div>
+
+                        <div class="labels-v2-sheet" id="labelSheetPreview" aria-label="Schematische Belegung des ersten Bogens"></div>
+                    </div>
+                </div>
+
+                <p class="labels-v2-preview-help">
+                    Die Darstellung ist bewusst schematisch. Masse, Seitenumbrüche und Druckpositionen werden exakt im PDF erzeugt.
+                </p>
+            </section>
+
+        </main>
 
     </div>
-
-</div>
 
 </form>
 
+<script src="{{ url_for('static', filename='js/labels-v2.js') }}"></script>
+
 {% else %}
 
-<div class="card">
-    <p>Bitte zuerst ein Projekt laden.</p>
-</div>
+<section class="labels-v2-card labels-v2-empty">
+    <h2>Kein KNX-Projekt geladen</h2>
+    <p>Bitte zuerst auf dem Dashboard ein Projekt laden.</p>
+    <a class="lc-back-button" href="/">Zum Dashboard</a>
+</section>
 
 {% endif %}
 

@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}DYMO LabelWriter · KNX Label Creator{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/labels-v2.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dymo-v2.css') }}">
+
+<nav class="tool-breadcrumb">
+    <a href="https://toolbox.ckoeppen.ch/">Toolbox</a>
+    <span>›</span>
+    <a href="/">KNX Label Creator</a>
+    <span>›</span>
+    <a href="/label-options">Etiketten</a>
+    <span>›</span>
+    <strong>DYMO LabelWriter</strong>
+</nav>
+
+<header class="tool-hero labels-v2-hero">
+    <div class="tool-hero-copy">
+        <p class="tool-eyebrow">KNX Label Creator</p>
+        <h1>DYMO LabelWriter</h1>
+        <p class="tool-description">
+            KNX-Geräte auswählen und als druckfertige 57 × 32-mm-Etiketten oder CSV ausgeben.
+        </p>
+    </div>
+
+    <div class="tool-actions">
+        <a class="lc-back-button" href="/label-options">← Zur Etikettenauswahl</a>
+    </div>
+</header>
+
+{% if project %}
+
+<form method="post" enctype="multipart/form-data" id="dymoForm" class="labels-v2-form dymo-v2-form">
+    <div class="labels-v2-layout dymo-v2-layout">
+        <aside class="labels-v2-sidebar">
+            <section class="labels-v2-card">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">01 · Format</span>
+                        <h2>DYMO-Etikett</h2>
+                    </div>
+                    <span class="labels-v2-badge">11354 · 57 × 32 mm</span>
+                </div>
+
+                <p class="dymo-v2-format-copy">
+                    Das PDF enthält eine Seite pro Etikett. Im Druckdialog bitte
+                    <strong>57 × 32 mm</strong> und <strong>100 % / Tatsächliche Grösse</strong> verwenden.
+                </p>
+            </section>
+
+            <section class="labels-v2-card">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">02 · Inhalt</span>
+                        <h2>Etiketteninhalt</h2>
+                    </div>
+                </div>
+
+                <div class="labels-v2-checks dymo-v2-checks">
+                    <label>
+                        <input class="dymo-content-toggle" type="checkbox" name="location" data-preview="location" checked>
+                        <span>Standortpfad</span>
+                    </label>
+                    <label>
+                        <input class="dymo-content-toggle" type="checkbox" name="address" data-preview="address" checked>
+                        <span>Physikalische Adresse</span>
+                    </label>
+                    <label>
+                        <input class="dymo-content-toggle" type="checkbox" name="room" data-preview="room" checked>
+                        <span>Raum / Verteiler</span>
+                    </label>
+                    <label>
+                        <input class="dymo-content-toggle" type="checkbox" name="description" data-preview="description" checked>
+                        <span>Beschreibung</span>
+                    </label>
+                </div>
+
+                <div class="labels-v2-logo-upload dymo-v2-logo-upload">
+                    <label class="labels-v2-field labels-v2-field-wide">
+                        <span>Logo (optional, nur PDF)</span>
+                        <input id="dymoLogo" name="logo" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg">
+                        <small>PNG oder JPG, maximal 2 MB. Helle Logos erhalten automatisch einen dunklen Hintergrund.</small>
+                    </label>
+                    <button type="button" id="dymoLogoClear" class="dymo-v2-logo-clear" hidden>Logo entfernen</button>
+                </div>
+            </section>
+
+            <section class="labels-v2-card dymo-v2-preview-card">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">03 · Vorschau</span>
+                        <h2>Beispieletikett</h2>
+                    </div>
+                    <span class="labels-v2-preview-note">Funktionale Vorschau</span>
+                </div>
+
+                <div class="dymo-v2-label" id="dymoPreviewLabel">
+                    <span class="dymo-v2-preview-location" id="dymoPreviewLocation">Standort / Bereich / Linie</span>
+                    <strong class="dymo-v2-preview-address" id="dymoPreviewAddress">1.1.1</strong>
+                    <span class="dymo-v2-preview-room" id="dymoPreviewRoom">Raum / Verteiler</span>
+                    <span class="dymo-v2-preview-description" id="dymoPreviewDescription">Gerätebeschreibung</span>
+                    <img id="dymoPreviewLogo" class="dymo-v2-preview-logo" alt="Logo-Vorschau" hidden>
+                </div>
+            </section>
+        </aside>
+
+        <main class="labels-v2-main">
+            <section class="labels-v2-card labels-v2-devices">
+                <div class="labels-v2-card-head labels-v2-device-head">
+                    <div>
+                        <span class="labels-v2-kicker">04 · Auswahl</span>
+                        <h2>Zu exportierende Geräte</h2>
+                    </div>
+
+                    <div class="labels-v2-count-pill">
+                        <strong id="dymoSelectedCount">0</strong>
+                        <span>ausgewählt</span>
+                    </div>
+                </div>
+
+                <div class="labels-v2-filter-grid">
+                    <label class="labels-v2-field labels-v2-search">
+                        <span>Suche</span>
+                        <input id="dymoDeviceSearch" type="search" placeholder="Adresse, Raum oder Beschreibung suchen" autocomplete="off">
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Bereich</span>
+                        <select id="dymoAreaFilter">
+                            <option value="">Alle Bereiche</option>
+                            {% for area in project.areas %}
+                            <option value="{{ area }}">Bereich {{ area }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <label class="labels-v2-field">
+                        <span>Linie</span>
+                        <select id="dymoLineFilter">
+                            <option value="">Alle Linien</option>
+                            {% for line in project.lines %}
+                            <option value="{{ line }}" data-area="{{ line.split('.')[0] }}">Linie {{ line }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+
+                <div class="labels-v2-selection-bar">
+                    <div class="labels-v2-actions">
+                        <button type="button" id="dymoSelectVisible">Sichtbare auswählen</button>
+                        <button type="button" id="dymoSelectAll">Alle auswählen</button>
+                        <button type="button" id="dymoClearAll">Auswahl aufheben</button>
+                    </div>
+
+                    <span>
+                        Sichtbar: <strong id="dymoVisibleCount">{{ project.devices|length }}</strong>
+                        · Gesamt: <strong>{{ project.devices|length }}</strong>
+                    </span>
+                </div>
+
+                <div class="labels-v2-table-wrap">
+                    <table class="labels-v2-table">
+                        <thead>
+                            <tr>
+                                <th class="labels-v2-check-col"></th>
+                                <th>Adresse</th>
+                                <th>Bereich</th>
+                                <th>Linie</th>
+                                <th>Raum</th>
+                                <th>Beschreibung</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dymoDeviceTable">
+                            {% for device in project.devices %}
+                            <tr
+                                data-search="{{ device.address }} {{ device.room }} {{ device.description }} {{ device.location }}"
+                                data-address="{{ device.address }}"
+                                data-location="{{ device.location }}"
+                                data-room="{{ device.room }}"
+                                data-description="{{ device.description }}"
+                                data-area="{{ device.address.split('.')[0] }}"
+                                data-line="{{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}"
+                            >
+                                <td class="labels-v2-check-col">
+                                    <input class="dymo-device-checkbox" type="checkbox" name="device" value="{{ device.address }}" aria-label="{{ device.address }} auswählen">
+                                </td>
+                                <td><strong>{{ device.address }}</strong></td>
+                                <td>{{ device.address.split('.')[0] }}</td>
+                                <td>{{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}</td>
+                                <td>{{ device.room }}</td>
+                                <td>{{ device.description }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="labels-v2-card dymo-v2-export-card">
+                <div>
+                    <span class="labels-v2-kicker">05 · Download</span>
+                    <h2>Ausgewählte Etiketten exportieren</h2>
+                    <p id="dymoExportStatus">Bitte mindestens ein Gerät auswählen.</p>
+                </div>
+
+                <div class="dymo-v2-export-actions">
+                    <button type="submit" id="dymoCsvButton" class="dymo-v2-export dymo-v2-export-secondary" formaction="{{ url_for('export_dymo_csv_file') }}" disabled>
+                        <span>CSV herunterladen</span>
+                        <small>Datenimport für DYMO Connect</small>
+                    </button>
+                    <button type="submit" id="dymoPdfButton" class="dymo-v2-export" formaction="{{ url_for('export_dymo_pdf_file') }}" disabled>
+                        <span>PDF herunterladen</span>
+                        <small>Eine Seite pro 57 × 32-mm-Etikett</small>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+</form>
+
+<script src="{{ url_for('static', filename='js/dymo-v2.js') }}"></script>
+
+{% else %}
+
+<section class="labels-v2-card labels-v2-empty">
+    <h2>Kein Projekt geladen</h2>
+    <p>Bitte zuerst auf dem Dashboard eine KNX-Projektdatei laden.</p>
+    <a class="lc-back-button" href="/">Zum Dashboard</a>
+</section>
+
+{% endif %}
+
+{% endblock %}

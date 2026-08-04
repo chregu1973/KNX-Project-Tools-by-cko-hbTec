@@ -1,0 +1,196 @@
+.ptouch-v2-layout {
+    align-items: start;
+}
+
+.ptouch-v2-form .labels-v2-field-wide + .labels-v2-field-wide {
+    margin-top: 14px;
+}
+
+.ptouch-v2-preview-wrap {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.ptouch-v2-preview-wrap p,
+.ptouch-v2-export-card p {
+    margin: 12px 0 0;
+    color: #91a0b8;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.ptouch-v2-tape {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr 1.35fr;
+    align-items: center;
+    width: min(100%, 330px);
+    min-height: 76px;
+    margin-top: 10px;
+    padding: 8px 20px;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.18);
+    border-radius: 4px;
+    background: #f7f7f3;
+    color: #111827;
+    box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.85), 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.ptouch-v2-tape::before,
+.ptouch-v2-tape::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.16) 0 5px, transparent 5px 9px);
+}
+
+.ptouch-v2-tape::before { top: 2px; }
+.ptouch-v2-tape::after { bottom: 2px; }
+
+.ptouch-v2-tape span,
+.ptouch-v2-tape strong {
+    position: relative;
+    z-index: 1;
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.ptouch-v2-tape span {
+    align-self: end;
+    font-size: 12px;
+    line-height: 1.1;
+}
+
+.ptouch-v2-tape strong {
+    align-self: start;
+    font-size: 25px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+.ptouch-v2-output-info {
+    display: grid;
+    gap: 10px;
+}
+
+.ptouch-v2-output-info > div {
+    display: grid;
+    gap: 3px;
+    padding: 12px 14px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.34);
+}
+
+.ptouch-v2-output-info strong {
+    color: #f8fafc;
+    font-size: 14px;
+}
+
+.ptouch-v2-output-info span,
+.ptouch-v2-compatibility {
+    color: #91a0b8;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.ptouch-v2-compatibility {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border-left: 3px solid #f4b740;
+    border-radius: 4px 10px 10px 4px;
+    background: rgba(244, 183, 64, 0.08);
+}
+
+.ptouch-v2-export-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.ptouch-v2-export-card h2 {
+    margin: 6px 0 0;
+}
+
+.ptouch-v2-export-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(210px, 1fr));
+    gap: 12px;
+    min-width: min(100%, 490px);
+}
+
+.ptouch-v2-export {
+    display: grid;
+    gap: 4px;
+    align-content: center;
+    min-height: 62px;
+    padding: 12px 18px;
+    border: 1px solid rgba(45, 212, 191, 0.56);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0f766e, #0d9488);
+    color: #fff;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+}
+
+.ptouch-v2-export-secondary {
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(30, 41, 59, 0.82);
+}
+
+.ptouch-v2-export:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+.ptouch-v2-export:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+}
+
+.ptouch-v2-export span {
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.ptouch-v2-export small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+}
+
+body.light .ptouch-v2-output-info > div {
+    background: #f8fafc;
+}
+
+body.light .ptouch-v2-output-info strong {
+    color: #162033;
+}
+
+@media (max-width: 1000px) {
+    .ptouch-v2-export-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .ptouch-v2-export-actions {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 620px) {
+    .ptouch-v2-export-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .ptouch-v2-tape {
+        min-height: 68px;
+    }
+}

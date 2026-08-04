@@ -1,0 +1,192 @@
+/* KNX Label Creator V2 – DYMO LabelWriter */
+
+.dymo-v2-layout {
+    align-items: start;
+}
+
+.dymo-v2-format-copy,
+.dymo-v2-export-card p {
+    margin: 0;
+    color: #91a0b8;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.dymo-v2-format-copy strong {
+    color: #e5edf7;
+}
+
+.dymo-v2-checks {
+    grid-template-columns: 1fr;
+}
+
+.dymo-v2-logo-upload {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.dymo-v2-logo-upload input[type="file"] {
+    height: auto;
+    padding: 8px;
+}
+
+.dymo-v2-logo-clear {
+    margin-top: 10px;
+    padding: 8px 11px;
+    color: #aebdd0;
+    background: rgba(30, 41, 59, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.dymo-v2-label {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 57 / 32;
+    overflow: hidden;
+    color: #111827;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.22);
+    border-radius: 8px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+}
+
+.dymo-v2-label > span,
+.dymo-v2-label > strong {
+    position: absolute;
+    left: 5.25%;
+    display: block;
+    max-width: 89.5%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.dymo-v2-preview-location {
+    top: 8%;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.dymo-v2-preview-address {
+    top: 28%;
+    font-size: clamp(25px, 3vw, 36px);
+    line-height: 1;
+    letter-spacing: 0.01em;
+}
+
+.dymo-v2-preview-room {
+    top: 57%;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.dymo-v2-preview-description {
+    bottom: 7%;
+    font-size: 12px;
+}
+
+.dymo-v2-preview-logo {
+    position: absolute;
+    top: 50%;
+    right: 5.25%;
+    width: 27%;
+    height: 31%;
+    padding: 3px;
+    background: rgba(226, 232, 240, 0.78);
+    border-radius: 3px;
+    object-fit: contain;
+    object-position: center;
+    transform: translateY(-50%);
+}
+
+.dymo-v2-label.has-logo .dymo-v2-preview-address,
+.dymo-v2-label.has-logo .dymo-v2-preview-room {
+    max-width: 58%;
+}
+
+.dymo-v2-export-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.dymo-v2-export-card h2 {
+    margin: 6px 0 8px;
+}
+
+.dymo-v2-export-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(210px, 1fr));
+    gap: 12px;
+    min-width: min(100%, 490px);
+}
+
+.dymo-v2-export {
+    display: grid;
+    gap: 4px;
+    align-content: center;
+    min-height: 62px;
+    padding: 12px 18px;
+    color: #fff;
+    background: linear-gradient(135deg, #0f766e, #0d9488);
+    border: 1px solid rgba(45, 212, 191, 0.56);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+}
+
+.dymo-v2-export-secondary {
+    background: rgba(30, 41, 59, 0.82);
+    border-color: rgba(148, 163, 184, 0.28);
+}
+
+.dymo-v2-export:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+.dymo-v2-export:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+}
+
+.dymo-v2-export span {
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.dymo-v2-export small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+}
+
+body.light .dymo-v2-format-copy strong {
+    color: #162033;
+}
+
+@media (max-width: 1000px) {
+    .dymo-v2-export-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .dymo-v2-export-actions {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 620px) {
+    .dymo-v2-export-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .dymo-v2-preview-address {
+        font-size: 25px;
+    }
+}

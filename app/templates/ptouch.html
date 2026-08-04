@@ -1,71 +1,248 @@
 {% extends "base.html" %}
 
+{% block title %}Brother P-touch · KNX Label Creator{% endblock %}
+
 {% block content %}
 
-<div class="card">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ptouch-v2.css') }}">
 
-    <h2>Brother P-touch CSV</h2>
+<nav class="tool-breadcrumb">
+    <a href="https://toolbox.ckoeppen.ch/">Toolbox</a>
+    <span>›</span>
+    <a href="/">KNX Label Creator</a>
+    <span>›</span>
+    <a href="/label-options">Etiketten</a>
+    <span>›</span>
+    <strong>Brother P-touch</strong>
+</nav>
 
-    {% if project %}
+<header class="tool-hero labels-v2-hero">
+    <div class="tool-hero-copy">
+        <p class="tool-eyebrow">KNX Label Creator</p>
+        <h1>Brother P-touch</h1>
+        <p class="tool-description">
+            KNX-Geräte auswählen und als CSV oder fertiges 6-mm-P-touch-Projekt ausgeben.
+        </p>
+    </div>
 
-    <form action="/export/ptouch" method="get">
+    <div class="tool-actions">
+        <a class="lc-back-button" href="/label-options">← Zur Etikettenauswahl</a>
+    </div>
+</header>
 
-        <label>Präfix</label><br>
-        <input name="prefix" value="hbTec | IBS">
+{% if project %}
 
-        <br><br>
+<form method="post" id="ptouchForm" class="labels-v2-form ptouch-v2-form">
 
-        <label>Datum</label><br>
-        <input name="date" value="{{ date }}">
+    <div class="labels-v2-layout ptouch-v2-layout">
 
-        <br><br>
+        <aside class="labels-v2-sidebar">
 
-        <br><br>
+            <section class="labels-v2-card">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">01 · Inhalt</span>
+                        <h2>Etikettenaufbau</h2>
+                    </div>
+                    <span class="labels-v2-badge">6 mm</span>
+                </div>
 
-         <label>Bereich</label><br>
-         <select name="area">
-         <option value="">Alle Bereiche</option>
-         {% for area in areas %}
-         <option value="{{ area }}">{{ area }}</option>
-         {% endfor %}
-         </select>
+                <label class="labels-v2-field labels-v2-field-wide">
+                    <span>Text / Präfix</span>
+                    <input id="ptouchPrefix" name="prefix" type="text" value="Firma XY | IBS" maxlength="80">
+                    <small>Wird zusammen mit dem Datum in der oberen Zeile ausgegeben.</small>
+                </label>
 
-         <br><br>
+                <label class="labels-v2-field labels-v2-field-wide">
+                    <span>Datum</span>
+                    <input id="ptouchDate" name="date" type="text" value="{{ date }}" maxlength="30">
+                </label>
 
-         <label>Linie</label><br>
-         <select name="line">
-         <option value="">Alle Linien</option>
-         {% for line in lines %}
-         <option value="{{ line }}">{{ line }}</option>
-         {% endfor %}
-         </select>
+                <div class="ptouch-v2-preview-wrap">
+                    <span class="labels-v2-preview-caption">Beispieletikett</span>
+                    <div class="ptouch-v2-tape" aria-label="Beispiel eines 6-mm-P-touch-Etiketts">
+                        <span id="ptouchPreviewHeader">Firma XY | IBS {{ date }}</span>
+                        <strong id="ptouchPreviewAddress">1.1.1</strong>
+                    </div>
+                    <p>
+                        Die Vorschau zeigt nur Aufbau und Inhalt. Schriftgrösse und Länge werden durch die P-touch-Vorlage bestimmt.
+                    </p>
+                </div>
+            </section>
 
-        <div class="ptouch-preview">
-            <div>hbTec | IBS {{ date }}</div>
-            <strong>{{ project.devices[0].address }}</strong>
-        </div>
+            <section class="labels-v2-card ptouch-v2-info">
+                <div class="labels-v2-card-head">
+                    <div>
+                        <span class="labels-v2-kicker">02 · Ausgabe</span>
+                        <h2>Zwei Varianten</h2>
+                    </div>
+                </div>
 
-        <br>
+                <div class="ptouch-v2-output-info">
+                    <div>
+                        <strong>CSV</strong>
+                        <span>Universeller Datenexport für den P-touch Editor.</span>
+                    </div>
+                    <div>
+                        <strong>P-touch-Projekt</strong>
+                        <span>Vorlage und Datenbank gemeinsam als .lbxs.</span>
+                    </div>
+                </div>
 
-        <button type="submit">Brother CSV erzeugen</button>
+                <p class="ptouch-v2-compatibility">
+                    Das P-touch-Projekt benötigt P-touch Editor 6.4 oder neuer und ist für 6-mm-Band vorbereitet. Die Vorlage wurde mit einem Brother PT-P900W erstellt. Bei einem anderen Modell muss der Drucker im Editor möglicherweise einmal neu ausgewählt werden.
+                </p>
+            </section>
 
-    </form>
+        </aside>
 
-    {% else %}
+        <main class="labels-v2-main">
 
-    <p>Bitte zuerst ein Projekt laden.</p>
+            <section class="labels-v2-card labels-v2-devices">
+                <div class="labels-v2-card-head labels-v2-device-head">
+                    <div>
+                        <span class="labels-v2-kicker">03 · Auswahl</span>
+                        <h2>Zu exportierende Geräte</h2>
+                    </div>
 
-    {% endif %}
+                    <div class="labels-v2-count-pill">
+                        <strong id="ptouchSelectedCount">0</strong>
+                        <span>ausgewählt</span>
+                    </div>
+                </div>
 
-</div>
+                <div class="labels-v2-filter-grid">
+                    <label class="labels-v2-field labels-v2-search">
+                        <span>Suche</span>
+                        <input
+                            id="ptouchDeviceSearch"
+                            type="search"
+                            placeholder="Adresse, Raum oder Beschreibung suchen"
+                            autocomplete="off"
+                        >
+                    </label>
 
-<div class="card">
+                    <label class="labels-v2-field">
+                        <span>Bereich</span>
+                        <select id="ptouchAreaFilter">
+                            <option value="">Alle Bereiche</option>
+                            {% for area in project.areas %}
+                            <option value="{{ area }}">Bereich {{ area }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
 
-    <h2>Importanleitung</h2>
+                    <label class="labels-v2-field">
+                        <span>Linie</span>
+                        <select id="ptouchLineFilter">
+                            <option value="">Alle Linien</option>
+                            {% for line in project.lines %}
+                            <option value="{{ line }}" data-area="{{ line.split('.')[0] }}">Linie {{ line }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
 
-    <p>Hier fügen wir später die Anleitung für den Brother P-touch Editor eindie kommt noch, frag einfach cko :)</p>
+                <div class="labels-v2-selection-bar">
+                    <div class="labels-v2-actions">
+                        <button type="button" id="ptouchSelectVisible">Sichtbare auswählen</button>
+                        <button type="button" id="ptouchSelectAll">Alle auswählen</button>
+                        <button type="button" id="ptouchClearAll">Auswahl aufheben</button>
+                    </div>
 
-</div>
+                    <span>
+                        Sichtbar: <strong id="ptouchVisibleCount">{{ project.devices|length }}</strong>
+                        · Gesamt: <strong>{{ project.devices|length }}</strong>
+                    </span>
+                </div>
+
+                <div class="labels-v2-table-wrap">
+                    <table class="labels-v2-table">
+                        <thead>
+                            <tr>
+                                <th class="labels-v2-check-col"></th>
+                                <th>Adresse</th>
+                                <th>Bereich</th>
+                                <th>Linie</th>
+                                <th>Raum</th>
+                                <th>Beschreibung</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="ptouchDeviceTable">
+                            {% for device in project.devices %}
+                            <tr
+                                data-search="{{ device.address }} {{ device.room }} {{ device.description }} {{ device.location }}"
+                                data-area="{{ device.address.split('.')[0] }}"
+                                data-line="{{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}"
+                            >
+                                <td class="labels-v2-check-col">
+                                    <input
+                                        class="ptouch-device-checkbox"
+                                        type="checkbox"
+                                        name="device"
+                                        value="{{ device.address }}"
+                                        aria-label="{{ device.address }} auswählen"
+                                    >
+                                </td>
+                                <td><strong>{{ device.address }}</strong></td>
+                                <td>{{ device.address.split('.')[0] }}</td>
+                                <td>{{ device.address.split('.')[0] }}.{{ device.address.split('.')[1] }}</td>
+                                <td>{{ device.room }}</td>
+                                <td>{{ device.description }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="labels-v2-card ptouch-v2-export-card">
+                <div>
+                    <span class="labels-v2-kicker">04 · Download</span>
+                    <h2>Ausgewählte Etiketten exportieren</h2>
+                    <p id="ptouchExportStatus">Bitte mindestens ein Gerät auswählen.</p>
+                </div>
+
+                <div class="ptouch-v2-export-actions">
+                    <button
+                        type="submit"
+                        id="ptouchCsvButton"
+                        class="ptouch-v2-export ptouch-v2-export-secondary"
+                        formaction="{{ url_for('export_ptouch_csv') }}"
+                        disabled
+                    >
+                        <span>CSV herunterladen</span>
+                        <small>Universelle Variante</small>
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="ptouchProjectButton"
+                        class="ptouch-v2-export"
+                        formaction="{{ url_for('export_ptouch_project_file') }}"
+                        disabled
+                    >
+                        <span>P-touch-Projekt herunterladen</span>
+                        <small>6-mm-Vorlage inklusive Datenbank</small>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</form>
+
+<script src="{{ url_for('static', filename='js/ptouch-v2.js') }}"></script>
+
+{% else %}
+
+<section class="labels-v2-card labels-v2-empty">
+    <h2>Kein Projekt geladen</h2>
+    <p>Bitte zuerst auf dem Dashboard eine KNX-Projektdatei laden.</p>
+    <a class="lc-back-button" href="/">Zum Dashboard</a>
+</section>
+
+{% endif %}
 
 {% endblock %}
-
