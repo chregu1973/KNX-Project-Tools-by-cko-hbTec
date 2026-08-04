@@ -7,9 +7,10 @@ from .xml_reader import XMLReader
 
 class KNXProjectParser:
 
-    def __init__(self, filename):
+    def __init__(self, filename, password=None):
 
         self.filename = filename
+        self.password = password
 
         self.project = Project()
 
@@ -20,27 +21,28 @@ class KNXProjectParser:
 
     def load(self):
 
-        reader = XMLReader(self.filename)
+        reader = XMLReader(self.filename, password=self.password)
 
-        self._read_project_information(reader)
+        try:
+            self._read_project_information(reader)
 
-        self._read_manufacturers(reader)
+            self._read_manufacturers(reader)
 
-        for filename, root in reader.find_all(".xml"):
+            for filename, root in reader.find_all(".xml"):
 
-            if not filename.startswith("P-"):
-                continue
+                if not filename.startswith("P-"):
+                    continue
 
-            if filename.endswith("project.xml"):
-                continue
+                if filename.endswith("project.xml"):
+                    continue
 
-            try:
-                self._parse_installation(root)
+                try:
+                    self._parse_installation(root)
 
-            except Exception as ex:
-                print(f"Parserfehler in {filename}: {ex}")
-
-        reader.close()
+                except Exception as ex:
+                    print(f"Parserfehler in {filename}: {ex}")
+        finally:
+            reader.close()
 
         self.project.devices.sort(
             key=lambda d: tuple(int(x) for x in d.address.split("."))
