@@ -1,6 +1,6 @@
 # KNX Label Creator V2
 
-**Version:** 2.0.1  
+**Version:** 2.1.0  
 **Autor:** Christian Köppen  
 **Unternehmen:** hbTec AG
 
@@ -21,6 +21,8 @@ KNX Label Creator ist eine webbasierte Anwendung, die physikalische Adressen und
 - DYMO LabelWriter 11354 als PDF im Format 57 × 32 mm
 - CSV-Export für DYMO Connect
 - geladenes Projekt und erzeugte Exporte manuell löschen
+- getrennte Projekt- und Exportdaten für jeden Browser
+- automatische Löschung aller Sitzungsdaten nach konfigurierbarer Inaktivität
 
 ## Installation
 
@@ -29,6 +31,8 @@ Vorausgesetzt werden Docker und Docker Compose.
 ```bash
 git clone https://github.com/chregu1973/KNX-Project-Tools-by-cko-hbTec.git
 cd KNX-Project-Tools-by-cko-hbTec
+cp .env.example .env
+# In .env unbedingt einen eigenen SECRET_KEY eintragen.
 docker compose up --build -d
 ```
 
@@ -50,12 +54,24 @@ Das DYMO-PDF verwendet pro Seite exakt 57 × 32 mm. Im Druckdialog muss **Tatsä
 
 ## Daten und Datenschutz
 
-- ETS-Projekte und Exporte liegen ausschließlich in den Docker-Volumes unter `data/` und werden nicht in Git aufgenommen.
-- Über **Projekt löschen / Neues Projekt** werden das aktuelle Projekt, der Cache und die erzeugten Exporte entfernt.
-- Version 2.0.1 verwaltet noch genau ein aktives Projekt pro Installation. Sie ist deshalb für eine eigene Installation beziehungsweise einen kontrollierten Testserver ausgelegt, nicht für einen öffentlichen Mehrbenutzerbetrieb.
-- Eine automatische, sitzungsbezogene Löschung ist für eine spätere Version vorgesehen.
+- Jeder Browser erhält eine zufällige, signierte Sitzungskennung. Projektdateien, Cache und Exporte unterschiedlicher Nutzer werden strikt in getrennten Verzeichnissen verarbeitet.
+- Im Cookie liegt nur die Sitzungskennung. Projektinhalt und Projektpasswort werden dort nicht gespeichert.
+- ETS-Projekte und Exporte liegen ausschließlich unter `data/sessions/` und werden nicht in Git aufgenommen.
+- Nach standardmäßig 60 Minuten ohne Aktivität löscht ein Hintergrundprozess das komplette Sitzungsverzeichnis. Die Frist ist mit `SESSION_TTL_MINUTES` konfigurierbar.
+- Über **Projekt löschen / Neues Projekt** werden die Daten der eigenen Sitzung sofort entfernt. Andere Sitzungen bleiben unangetastet.
+- Das Passwort eines geschützten ETS-Projekts wird nur im Arbeitsspeicher für den Import verwendet und niemals gespeichert.
 
-Für einen dauerhaft stabilen Flask-Sitzungsschlüssel kann beim Containerstart die Umgebungsvariable `SECRET_KEY` gesetzt werden. Ohne diese Variable erzeugt die Anwendung bei jedem Containerstart einen neuen zufälligen Schlüssel.
+Für den öffentlichen Betrieb muss in `.env` ein dauerhafter, zufälliger `SECRET_KEY` gesetzt werden. Hinter einer HTTPS-Verbindung sollte außerdem `SESSION_COOKIE_SECURE=true` aktiviert sein.
+
+## Konfiguration
+
+| Variable | Standard | Bedeutung |
+| --- | ---: | --- |
+| `SECRET_KEY` | zufällig je Containerstart | Signiert die Browser-Sitzung; produktiv dauerhaft setzen |
+| `SESSION_TTL_MINUTES` | `60` | Löschung nach dieser Anzahl Minuten ohne Aktivität |
+| `SESSION_CLEANUP_INTERVAL_SECONDS` | `300` | Prüfintervall der automatischen Bereinigung |
+| `SESSION_COOKIE_SECURE` | `false` | Cookie nur über HTTPS senden; online auf `true` setzen |
+| `SESSION_CLEANUP_ENABLED` | `true` | Hintergrundbereinigung aktivieren |
 
 ## Projektstruktur
 
@@ -68,8 +84,12 @@ app/
 └── templates/
 
 data/
-├── uploads/
-└── exports/
+└── sessions/
+    └── <zufällige Sitzungskennung>/
+        ├── uploads/
+        ├── exports/
+        ├── current_project.pkl
+        └── .last_activity
 ```
 
 ## Lizenz
