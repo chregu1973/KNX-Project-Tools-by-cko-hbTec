@@ -44,7 +44,7 @@
             </span>
         {% endif %}
 
-        <span class="lc-version">V2 · 2.1.1</span>
+        <span class="lc-version">V2 · 2.1.2</span>
     </div>
 </header>
 
@@ -121,12 +121,17 @@
     </form>
 </section>
 <section class="lc-privacy-card">
-    <div class="lc-privacy-icon" aria-hidden="true">♙</div>
+    <div class="lc-privacy-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M12 3 4.5 6v5.2c0 4.7 3.1 8.1 7.5 9.8 4.4-1.7 7.5-5.1 7.5-9.8V6L12 3Z"></path>
+            <path d="m8.5 12 2.2 2.2 4.8-5"></path>
+        </svg>
+    </div>
 
     <div class="lc-privacy-content">
         <div class="lc-privacy-title">
-            <strong>Datenschutz und Projektdateien</strong>
-            <span>Automatische Löschung aktiv</span>
+            <strong>Deine Projektdaten bleiben geschützt</strong>
+            <span>Automatische Löschung · nach {{ session_ttl_minutes }} Min.</span>
         </div>
 
         <p>
