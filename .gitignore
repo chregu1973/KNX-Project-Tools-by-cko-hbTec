@@ -1,13 +1,8 @@
 __pycache__/
 *.py[cod]
 
-data/uploads/*
-!data/uploads/.gitkeep
-
-data/exports/*
-!data/exports/.gitkeep
-
-data/current_project.pkl
+data/*
+!data/.gitkeep
 
 *.log
 .DS_Store
