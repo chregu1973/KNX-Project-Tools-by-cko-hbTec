@@ -1,183 +1,208 @@
 {% extends "base.html" %}
 
+{% block title %}KNX Label Creator · CKO Toolbox{% endblock %}
+
 {% block content %}
 
-<div class="card">
+<nav class="tool-breadcrumb">
+    <a href="https://toolbox.ckoeppen.ch/">Toolbox</a>
+    <span>›</span>
+    <a href="https://toolbox.ckoeppen.ch/">KNX Tools</a>
+    <span>›</span>
+    <strong>Label Creator</strong>
+</nav>
 
-    <h2>Projekt öffnen</h2>
+<header class="tool-hero">
+    <div class="tool-hero-copy">
+        <p class="tool-eyebrow">KNX Tools</p>
+        <h1>KNX Label Creator</h1>
+        <p class="tool-description">
+            Druckfertige Etiketten und Gerätedaten direkt aus
+            ETS5- und ETS6-Projekten erstellen.
+        </p>
+    </div>
 
-    <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="showLoading()">
+    <div class="tool-actions">
+        {% if project %}
+
+<div class="lc-project-delete-row">
+    <form
+        id="deleteProjectForm"
+        action="{{ url_for('delete_project') }}"
+        method="post"
+        onsubmit="return confirm('Das aktuell geladene KNX-Projekt und die erzeugten Exportdateien werden gelöscht. Möchtest du fortfahren?');"
+    >
+        <button type="submit" class="lc-project-delete-button">
+            <span aria-hidden="true">×</span>
+            Projekt löschen / Neues Projekt
+        </button>
+    </form>
+</div>
+
+            <span class="tool-project-pill">
+                {{ project.name or project.filename }}
+            </span>
+        {% endif %}
+
+        <span class="lc-version">V2 · 2.0.0</span>
+    </div>
+</header>
+
+<section class="lc-upload-card">
+    <div class="lc-upload-copy">
+        <span class="lc-kicker">
+            {% if project %}PROJEKT WECHSELN{% else %}ERSTER SCHRITT{% endif %}
+        </span>
+
+        <h2>
+            {% if project %}
+                Anderes KNX-Projekt laden
+            {% else %}
+                KNX-Projekt auswählen
+            {% endif %}
+        </h2>
+
+        <p>
+            ETS-Projekt auswählen und für die Erstellung der
+            Etiketten einlesen.
+        </p>
+    </div>
+
+    <form
+        class="lc-upload-form"
+        action="/upload"
+        method="post"
+        enctype="multipart/form-data"
+        onsubmit="showLoading()">
+
+        <label class="v2-file-picker lc-file-picker" for="projectFile">
+            <span class="lc-file-icon">＋</span>
+
+            <span class="lc-file-text">
+                <strong id="projectFileLabel">
+                    KNX-Projekt auswählen
+                </strong>
+                <small>.knxproj · ETS5 oder ETS6</small>
+            </span>
+        </label>
 
         <input
+            id="projectFile"
+            class="v2-hidden-file"
             type="file"
             name="project"
             accept=".knxproj"
             required>
 
-        <button type="submit" id="loadButton">
-    Projekt laden
-    </button>
+        <button
+            class="v2-primary-button lc-load-button"
+            type="submit"
+            id="loadButton"
+            disabled>
+            Projekt einlesen
+        </button>
 
-    <div id="loadingBox" class="loading-box" style="display:none;">
-         <div class="spinner"></div>
-         <div>Projekt wird geladen… bitte warten</div>
-    </div>
-
+        <div id="loadingBox" class="loading-box" style="display:none;">
+            <div class="spinner"></div>
+            <div>Projekt wird eingelesen … Dies kann je nach Projektgrösse bis zu 5 Minuten dauern.</div>
+        </div>
     </form>
+</section>
+<section class="lc-privacy-card">
+    <div class="lc-privacy-icon" aria-hidden="true">♙</div>
 
-</div>
+    <div class="lc-privacy-content">
+        <div class="lc-privacy-title">
+            <strong>Datenschutz und Projektdateien</strong>
+            <span>In Vorbereitung</span>
+        </div>
+
+        <p>
+            Die temporäre, sitzungsbezogene Verarbeitung von
+            KNX-Projektdateien wird derzeit umgesetzt. Projektdateien
+            sollen künftig nach Ablauf der Sitzung automatisch gelöscht
+            und nicht dauerhaft gespeichert werden.
+        </p>
+    </div>
+</section>
 
 
 {% if project %}
-<div class="stats-grid">
 
-    <div class="stat-card">
-        <div class="stat-value">{{ project.device_count }}</div>
-        <div class="stat-title">Geräte</div>
+<section class="lc-project-bar">
+    <div class="lc-project-status">
+        <span></span>
+        Projekt bereit
     </div>
 
-    <div class="stat-card">
-        <div class="stat-value">{{ project.area_count }}</div>
-        <div class="stat-title">Bereiche</div>
+    <div class="lc-project-title">
+        <strong>{{ project.name or project.filename }}</strong>
+        <small>{{ project.filename }}</small>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-value">{{ project.line_count }}</div>
-        <div class="stat-title">Linien</div>
-    </div>
-    <div class="stat-card">
-    <div class="stat-value">{{ project.room_count }}</div>
-    <div class="stat-title">Räume</div>
+    <div class="lc-project-stat">
+        <strong>{{ project.device_count }}</strong>
+        <span>Geräte</span>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-value">{{ project.building_count }}</div>
-        <div class="stat-title">Gebäude</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{% if project.backbone %}Ja{% else %}Nein{% endif %}</div>
-        <div class="stat-title">Backbone</div>
+    <div class="lc-project-stat">
+        <strong>{{ project.room_count }}</strong>
+        <span>Räume</span>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-value">{{ project.ets_version }}</div>
-        <div class="stat-title">ETS-Version</div>
+    <div class="lc-project-stat">
+        <strong>{{ project.ets_version }}</strong>
+        <span>ETS-Version</span>
     </div>
+</section>
 
-</div>
-<div class="dashboard-grid">
-
-    <div class="card">
-
-        <h2>Projektinformationen</h2>
-
-        <table class="info-table">
-
-            <tr>
-                <td>Projekt</td>
-                <td>{{ project.name }}</td>
-            </tr>
-
-            <tr>
-                <td>Datei</td>
-                <td>{{ project.filename }}</td>
-            </tr>
-
-            <tr>
-                <td>ETS</td>
-                <td>{{ project.ets_version }}</td>
-            </tr>
-
-            <tr>
-                <td>Version</td>
-                <td>{{ project.tool_version }}</td>
-            </tr>
-
-
-        </table>
-
+<div class="lc-section-head">
+    <div>
+        <span class="lc-kicker">AUSGABE WÄHLEN</span>
+        <h2>Was möchtest du erstellen?</h2>
     </div>
-
-    <div class="card">
-
-        <h2>Herstellerübersicht</h2>
-
-        <table class="info-table">
-           {% for name, count in manufacturers.items() %}
-        <tr>
-        <td>{{ name }}</td>
-        <td>{{ count }}</td>
-        </tr>
-          {% endfor %}
-      </table>
-
-    </div>
-
 </div>
 
+<section class="lc-tool-grid lc-tool-grid-main">
 
-<div class="card">
+    <a class="lc-tool-card lc-tool-card-blue" href="/label-options">
+        <div class="lc-card-top">
+            <span class="lc-card-icon">▣</span>
+            <span class="lc-card-badge">Auswahl</span>
+        </div>
+        <h3>Etiketten</h3>
+        <p>
+            Etikettentyp auswählen und passende Beschriftungen
+            für KNX-Geräte erstellen.
+        </p>
+        <div class="lc-card-link">Etiketten auswählen →</div>
+    </a>
 
-    <h2>Erste Geräte</h2>
+    <a class="lc-tool-card lc-tool-card-green" href="/export/csv">
+        <div class="lc-card-top">
+            <span class="lc-card-icon">↓</span>
+            <span class="lc-card-badge">CSV</span>
+        </div>
+        <h3>CSV-Export</h3>
+        <p>
+            Vollständige Geräteliste mit physikalischen Adressen
+            direkt als CSV-Datei herunterladen.
+        </p>
+        <div class="lc-card-link">CSV herunterladen →</div>
+    </a>
 
-    <table class="device-table">
-
-        <thead>
-
-        <tr>
-
-            <th>Adresse</th>
-            <th>Raum</th>
-            <th>Beschreibung</th>
-            <th>Seriennummer</th>
-
-        </tr>
-
-        </thead>
-
-        <tbody>
-
-        {% for device in project.devices[:20] %}
-
-        <tr>
-
-            <td>{{ device.address }}</td>
-
-            <td>{{ device.room }}</td>
-
-            <td>{{ device.description }}</td>
-
-            <td>{{ device.serial }}</td>
-
-        </tr>
-
-        {% endfor %}
-
-        </tbody>
-
-    </table>
-
-</div>
+</section>
 
 {% else %}
 
-<div class="card">
-
-    <h2>Willkommen</h2>
-
+<section class="lc-empty">
+    <div class="lc-empty-icon">KNX</div>
+    <h2>Noch kein Projekt geladen</h2>
     <p>
-
-        Willkommen bei den <b>KNX Project Tools</b>.
-
+        Lade oben eine ETS-Projektdatei. Anschließend stehen
+        die Geräte für Etiketten und Exporte zur Auswahl.
     </p>
-
-    <p>
-
-        Bitte wählen Sie eine ETS5- oder ETS6-Projektdatei aus.
-
-    </p>
-
-</div>
+</section>
 
 {% endif %}
 

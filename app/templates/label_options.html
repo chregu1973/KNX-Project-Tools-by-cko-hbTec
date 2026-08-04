@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Etiketten · KNX Label Creator{% endblock %}
+
+{% block content %}
+
+<nav class="tool-breadcrumb">
+    <a href="https://toolbox.ckoeppen.ch/">Toolbox</a>
+    <span>›</span>
+    <a href="/">KNX Label Creator</a>
+    <span>›</span>
+    <strong>Etiketten</strong>
+</nav>
+
+<header class="tool-hero">
+    <div class="tool-hero-copy">
+        <p class="tool-eyebrow">KNX Label Creator</p>
+        <h1>Etiketten auswählen</h1>
+        <p class="tool-description">
+            Wähle das gewünschte Beschriftungs- oder Drucksystem.
+        </p>
+    </div>
+
+    <div class="tool-actions">
+        <a class="lc-back-button" href="/">← Zum Dashboard</a>
+    </div>
+</header>
+
+<section class="lc-tool-grid lc-label-grid">
+
+    <a class="lc-tool-card lc-tool-card-cyan" href="/ptouch">
+        <div class="lc-card-top">
+            <span class="lc-card-icon">⌁</span>
+            <span class="lc-card-badge">CSV · 6 mm</span>
+        </div>
+        <h3>Brother P-touch</h3>
+        <p>
+            Beschriftungsdaten für P-touch-Bänder auswählen
+            und als CSV exportieren.
+        </p>
+        <div class="lc-card-link">P-touch öffnen →</div>
+    </a>
+
+    <a class="lc-tool-card lc-tool-card-blue" href="/labels">
+        <div class="lc-card-top">
+            <span class="lc-card-icon">▣</span>
+            <span class="lc-card-badge">PDF · A4</span>
+        </div>
+        <h3>Benutzerdefinierte Etiketten</h3>
+        <p>
+            Geräte auswählen und als druckfertigen
+            Etikettenbogen im PDF-Format erstellen.
+        </p>
+        <div class="lc-card-link">Etikettenbogen öffnen →</div>
+    </a>
+
+    <a class="lc-tool-card lc-tool-card-cyan" href="/dymo">
+        <div class="lc-card-top">
+            <span class="lc-card-icon">D</span>
+            <span class="lc-card-badge">PDF · 57 × 32 mm</span>
+        </div>
+        <h3>DYMO LabelWriter</h3>
+        <p>
+            Geräte auswählen und als druckfertige Etiketten
+            oder CSV für DYMO Connect exportieren.
+        </p>
+        <div class="lc-card-link">DYMO öffnen →</div>
+    </a>
+
+</section>
+
+{% endblock %}

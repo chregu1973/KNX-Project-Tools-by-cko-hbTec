@@ -215,11 +215,6 @@ input[type=file]{
 }
 .labels-layout{
     display:grid;
-    grid-template-columns:320px 1fr;
-    gap:25px;
-    align-items:start;
-.labels-layout{
-    display:grid;
     grid-template-columns:360px minmax(700px,1fr);
     gap:25px;
     align-items:start;
@@ -391,4 +386,692 @@ input[type=file]{
     display:flex;
     gap:25px;
     font-weight:bold;
+}
+
+
+/* =========================================================
+   KNX Label Creator V2
+   ========================================================= */
+
+:root{
+    --v2-bg:#0b0f16;
+    --v2-panel:#131a24;
+    --v2-panel-soft:#18212e;
+    --v2-border:#293446;
+    --v2-border-soft:#202a39;
+    --v2-text:#f4f7fb;
+    --v2-muted:#8e9aae;
+    --v2-red:#ef3340;
+    --v2-red-dark:#bc202c;
+    --v2-green:#42d392;
+}
+
+.v2-body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 80% 0%, rgba(239,51,64,.08), transparent 28%),
+        var(--v2-bg);
+    color:var(--v2-text);
+}
+
+.v2-sidebar{
+    position:fixed;
+    inset:0 auto 0 0;
+    width:270px;
+    display:flex;
+    flex-direction:column;
+    background:#0d131c;
+    border-right:1px solid var(--v2-border-soft);
+    z-index:20;
+}
+
+.v2-brand{
+    min-height:112px;
+    padding:27px 26px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border-bottom:1px solid var(--v2-border-soft);
+}
+
+.v2-brand-mark{
+    width:48px;
+    height:48px;
+    display:grid;
+    place-items:center;
+    border:2px solid var(--v2-red);
+    border-radius:10px;
+    color:var(--v2-red);
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:.5px;
+}
+
+.v2-brand-name{
+    font-size:21px;
+    font-weight:750;
+    letter-spacing:.2px;
+}
+
+.v2-brand-tool{
+    margin-top:4px;
+    color:var(--v2-muted);
+    font-size:12px;
+}
+
+.v2-nav{
+    margin:0;
+    padding:24px 14px;
+    flex:1;
+}
+
+.v2-nav-label{
+    margin:18px 14px 7px;
+    color:#606c7e;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.5px;
+}
+
+.v2-nav-label:first-child{
+    margin-top:0;
+}
+
+.v2-nav a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:3px 0;
+    padding:12px 14px;
+    border:1px solid transparent;
+    border-radius:8px;
+    color:#aeb8c7;
+    font-size:14px;
+}
+
+.v2-nav a:hover{
+    background:#151e2a;
+    color:#fff;
+}
+
+.v2-nav a.active{
+    background:rgba(239,51,64,.10);
+    border-color:rgba(239,51,64,.24);
+    color:#fff;
+}
+
+.v2-nav a.active .v2-nav-icon{
+    color:var(--v2-red);
+}
+
+.v2-nav-icon{
+    width:22px;
+    color:#778398;
+    font-size:18px;
+    text-align:center;
+}
+
+.v2-sidebar-footer{
+    padding:20px 28px;
+    border-top:1px solid var(--v2-border-soft);
+    color:#6f7b8d;
+    font-size:12px;
+}
+
+.v2-status-dot,
+.v2-success-dot{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    margin-right:8px;
+    border-radius:50%;
+    background:var(--v2-green);
+    box-shadow:0 0 10px rgba(66,211,146,.55);
+}
+
+.v2-content{
+    min-height:100vh;
+    margin-left:270px;
+    padding:36px 44px 24px;
+}
+
+.v2-topbar{
+    min-height:76px;
+    margin-bottom:34px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+}
+
+.v2-eyebrow,
+.v2-section-tag,
+.v2-tool-kicker{
+    color:var(--v2-red);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.6px;
+}
+
+.v2-topbar h1{
+    margin:6px 0 5px;
+    font-size:30px;
+    letter-spacing:-.6px;
+}
+
+.v2-subtitle{
+    color:var(--v2-muted);
+    font-size:14px;
+}
+
+.v2-version{
+    padding:8px 12px;
+    border:1px solid var(--v2-border);
+    border-radius:8px;
+    background:rgba(19,26,36,.78);
+    color:#7f8b9e;
+    font-size:12px;
+}
+
+.v2-version span{
+    margin-right:7px;
+    color:var(--v2-red);
+    font-weight:800;
+}
+
+.v2-upload-card{
+    display:grid;
+    grid-template-columns:minmax(240px,.75fr) minmax(430px,1.25fr);
+    gap:36px;
+    align-items:center;
+    padding:28px 30px;
+    margin-bottom:22px;
+    background:linear-gradient(135deg,#151e2a,#111822);
+    border:1px solid var(--v2-border);
+    border-radius:12px;
+    box-shadow:0 16px 40px rgba(0,0,0,.2);
+}
+
+.v2-upload-copy h2,
+.v2-section-heading h2{
+    margin:7px 0 8px;
+    font-size:20px;
+}
+
+.v2-upload-copy p{
+    max-width:520px;
+    color:var(--v2-muted);
+    font-size:13px;
+    line-height:1.55;
+}
+
+.v2-upload-form{
+    display:grid;
+    grid-template-columns:minmax(250px,1fr) auto;
+    gap:12px;
+    align-items:stretch;
+}
+
+.v2-file-picker{
+    min-height:66px;
+    padding:12px 15px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border:1px dashed #40506a;
+    border-radius:9px;
+    background:#0d141e;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.v2-file-picker:hover,
+.v2-file-picker.has-file{
+    border-color:var(--v2-red);
+    background:rgba(239,51,64,.05);
+}
+
+.v2-file-icon{
+    width:34px;
+    height:34px;
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    border-radius:7px;
+    background:#202b3b;
+    color:var(--v2-red);
+    font-size:22px;
+}
+
+.v2-file-picker strong,
+.v2-file-picker small{
+    display:block;
+}
+
+.v2-file-picker strong{
+    max-width:330px;
+    overflow:hidden;
+    color:#e9edf4;
+    font-size:13px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.v2-file-picker small{
+    margin-top:5px;
+    color:#707c8f;
+    font-size:11px;
+}
+
+.v2-hidden-file{
+    position:absolute;
+    width:1px;
+    height:1px;
+    opacity:0;
+    pointer-events:none;
+}
+
+.v2-primary-button{
+    min-width:150px;
+    border-radius:9px;
+    background:var(--v2-red);
+    font-weight:700;
+}
+
+.v2-primary-button:hover{
+    background:var(--v2-red-dark);
+}
+
+.v2-primary-button:disabled{
+    background:#303a49;
+    color:#737e90;
+    cursor:not-allowed;
+}
+
+.v2-upload-form .loading-box{
+    grid-column:1/-1;
+    width:100%;
+    margin:0;
+}
+
+.v2-project-strip{
+    display:grid;
+    grid-template-columns:auto minmax(260px,1fr) auto;
+    gap:28px;
+    align-items:center;
+    padding:18px 22px;
+    margin-bottom:35px;
+    border:1px solid var(--v2-border-soft);
+    border-radius:10px;
+    background:rgba(19,26,36,.72);
+}
+
+.v2-project-state{
+    color:#aeb9c8;
+    font-size:12px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.v2-project-name{
+    min-width:0;
+    padding-left:26px;
+    border-left:1px solid var(--v2-border);
+}
+
+.v2-project-name strong,
+.v2-project-name span{
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.v2-project-name strong{
+    font-size:14px;
+}
+
+.v2-project-name span{
+    margin-top:4px;
+    color:#737f91;
+    font-size:11px;
+}
+
+.v2-project-facts{
+    display:flex;
+    align-items:center;
+}
+
+.v2-project-facts > div{
+    min-width:86px;
+    padding:0 18px;
+    border-left:1px solid var(--v2-border);
+    text-align:center;
+}
+
+.v2-project-facts strong,
+.v2-project-facts span{
+    display:block;
+}
+
+.v2-project-facts strong{
+    font-size:18px;
+}
+
+.v2-project-facts span{
+    margin-top:3px;
+    color:#707c8e;
+    font-size:10px;
+}
+
+.v2-section-heading{
+    margin-bottom:16px;
+}
+
+.v2-tool-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(280px,1fr));
+    gap:16px;
+}
+
+.v2-tool-card{
+    min-height:170px;
+    padding:23px;
+    display:grid;
+    grid-template-columns:48px 1fr auto;
+    gap:17px;
+    align-items:start;
+    border:1px solid var(--v2-border);
+    border-radius:11px;
+    background:var(--v2-panel);
+    color:var(--v2-text);
+    text-decoration:none;
+    transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+
+.v2-tool-card:hover{
+    transform:translateY(-2px);
+    border-color:#44536a;
+    background:var(--v2-panel-soft);
+}
+
+.v2-tool-card-primary{
+    border-color:rgba(239,51,64,.38);
+    background:
+        linear-gradient(135deg,rgba(239,51,64,.075),transparent 48%),
+        var(--v2-panel);
+}
+
+.v2-tool-icon{
+    width:46px;
+    height:46px;
+    display:grid;
+    place-items:center;
+    border:1px solid #344156;
+    border-radius:9px;
+    background:#1b2533;
+    color:var(--v2-red);
+    font-size:22px;
+}
+
+.v2-tool-content h3{
+    margin:6px 0 9px;
+    font-size:17px;
+}
+
+.v2-tool-content p{
+    color:var(--v2-muted);
+    font-size:12px;
+    line-height:1.55;
+}
+
+.v2-tool-arrow{
+    align-self:center;
+    color:#69768a;
+    font-size:22px;
+}
+
+.v2-coming-soon{
+    align-self:center;
+    padding:5px 8px;
+    border-radius:5px;
+    background:#242e3d;
+    color:#748094;
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.v2-tool-card-disabled{
+    opacity:.62;
+    cursor:default;
+}
+
+.v2-tool-card-disabled:hover{
+    transform:none;
+    border-color:var(--v2-border);
+    background:var(--v2-panel);
+}
+
+.v2-empty-state{
+    min-height:280px;
+    padding:55px 25px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border:1px dashed #2e3a4e;
+    border-radius:12px;
+    background:rgba(19,26,36,.45);
+    text-align:center;
+}
+
+.v2-empty-icon{
+    width:60px;
+    height:60px;
+    display:grid;
+    place-items:center;
+    margin-bottom:18px;
+    border:1px solid rgba(239,51,64,.4);
+    border-radius:12px;
+    color:var(--v2-red);
+    font-size:13px;
+    font-weight:800;
+}
+
+.v2-empty-state h2{
+    margin-bottom:10px;
+    font-size:18px;
+}
+
+.v2-empty-state p{
+    max-width:520px;
+    color:var(--v2-muted);
+    font-size:13px;
+    line-height:1.55;
+}
+
+.v2-footer{
+    display:flex;
+    justify-content:space-between;
+    margin-top:42px;
+    padding-top:18px;
+    border-top:1px solid var(--v2-border-soft);
+    color:#515d6e;
+    font-size:10px;
+}
+
+@media (max-width:1050px){
+    .v2-upload-card{
+        grid-template-columns:1fr;
+        gap:20px;
+    }
+
+    .v2-project-strip{
+        grid-template-columns:1fr;
+        gap:14px;
+    }
+
+    .v2-project-name{
+        padding:0;
+        border-left:0;
+    }
+
+    .v2-project-facts{
+        border-top:1px solid var(--v2-border);
+        padding-top:14px;
+    }
+
+    .v2-project-facts > div:first-child{
+        padding-left:0;
+        border-left:0;
+    }
+}
+
+@media (max-width:760px){
+    .v2-sidebar{
+        position:static;
+        width:100%;
+        height:auto;
+    }
+
+    .v2-brand{
+        min-height:auto;
+        padding:18px 20px;
+    }
+
+    .v2-nav{
+        display:flex;
+        gap:7px;
+        padding:10px;
+        overflow-x:auto;
+    }
+
+    .v2-nav-label,
+    .v2-sidebar-footer{
+        display:none;
+    }
+
+    .v2-nav a{
+        flex:0 0 auto;
+    }
+
+    .v2-content{
+        margin-left:0;
+        padding:25px 18px;
+    }
+
+    .v2-topbar{
+        gap:20px;
+    }
+
+    .v2-upload-form,
+    .v2-tool-grid{
+        grid-template-columns:1fr;
+    }
+
+    .v2-project-facts{
+        overflow-x:auto;
+    }
+
+    .v2-footer{
+        display:block;
+        line-height:1.7;
+    }
+}
+
+
+/* =========================================================
+   V2 Farbanpassung – ruhiges CKO-Toolbox-Blau
+   Rot bleibt nur als sparsamer Markenakzent
+   ========================================================= */
+
+:root{
+    --v2-blue:#3b82f6;
+    --v2-blue-light:#60a5fa;
+    --v2-blue-dark:#2563eb;
+}
+
+/* Hintergrund ohne roten Lichtschein */
+.v2-body{
+    background:
+        radial-gradient(
+            circle at 82% 0%,
+            rgba(59,130,246,.08),
+            transparent 30%
+        ),
+        var(--v2-bg);
+}
+
+/* Rot nur beim CKO-Logo beibehalten */
+.v2-brand-mark{
+    border-color:var(--v2-red);
+    color:var(--v2-red);
+}
+
+/* Aktive Navigation in Blau */
+.v2-nav a.active{
+    background:rgba(59,130,246,.10);
+    border-color:rgba(59,130,246,.28);
+}
+
+.v2-nav a.active .v2-nav-icon{
+    color:var(--v2-blue-light);
+}
+
+/* Kleine Überschrift bleibt KNX-Akzent in Rot */
+.v2-eyebrow{
+    color:var(--v2-red);
+}
+
+/* Bereiche und Karten in Blau */
+.v2-section-tag,
+.v2-tool-kicker{
+    color:var(--v2-blue-light);
+}
+
+/* Versionskennzeichnung dezent blau */
+.v2-version span{
+    color:var(--v2-blue-light);
+}
+
+/* Dateiauswahl */
+.v2-file-picker:hover,
+.v2-file-picker.has-file{
+    border-color:var(--v2-blue);
+    background:rgba(59,130,246,.055);
+}
+
+.v2-file-icon{
+    color:var(--v2-blue-light);
+}
+
+/* Hauptbutton */
+.v2-primary-button{
+    background:var(--v2-blue-dark);
+}
+
+.v2-primary-button:hover{
+    background:var(--v2-blue);
+}
+
+/* Werkzeugkarten */
+.v2-tool-card-primary{
+    border-color:rgba(59,130,246,.38);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(59,130,246,.075),
+            transparent 48%
+        ),
+        var(--v2-panel);
+}
+
+.v2-tool-icon{
+    color:var(--v2-blue-light);
+}
+
+/* Leerer Projektzustand */
+.v2-empty-icon{
+    border-color:rgba(59,130,246,.4);
+    color:var(--v2-blue-light);
 }

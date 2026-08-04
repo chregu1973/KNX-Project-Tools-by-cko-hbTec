@@ -7,8 +7,10 @@ data/uploads/*
 data/exports/*
 !data/exports/.gitkeep
 
+data/current_project.pkl
+
 *.log
+.DS_Store
 .env
 .vscode/
 .idea/
-
