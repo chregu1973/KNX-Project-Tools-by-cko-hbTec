@@ -4,6 +4,4 @@
 __pycache__
 *.py[cod]
 *.log
-data/uploads/*
-data/exports/*
-data/current_project.pkl
+data/*

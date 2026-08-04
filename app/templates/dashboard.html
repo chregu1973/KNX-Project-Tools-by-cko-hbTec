@@ -44,7 +44,7 @@
             </span>
         {% endif %}
 
-        <span class="lc-version">V2 · 2.0.1</span>
+        <span class="lc-version">V2 · 2.1.0</span>
     </div>
 </header>
 
@@ -126,14 +126,14 @@
     <div class="lc-privacy-content">
         <div class="lc-privacy-title">
             <strong>Datenschutz und Projektdateien</strong>
-            <span>In Vorbereitung</span>
+            <span>Automatische Löschung aktiv</span>
         </div>
 
         <p>
-            Die temporäre, sitzungsbezogene Verarbeitung von
-            KNX-Projektdateien wird derzeit umgesetzt. Projektdateien
-            sollen künftig nach Ablauf der Sitzung automatisch gelöscht
-            und nicht dauerhaft gespeichert werden.
+            Dein KNX-Projekt und alle erzeugten Exporte sind ausschließlich
+            deiner Browser-Sitzung zugeordnet. Nach {{ session_ttl_minutes }}
+            Minuten ohne Aktivität werden sämtliche Sitzungsdaten automatisch
+            gelöscht. Das Projektpasswort wird zu keinem Zeitpunkt gespeichert.
         </p>
     </div>
 </section>

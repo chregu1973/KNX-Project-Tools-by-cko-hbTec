@@ -7,6 +7,9 @@ services:
       - "5002:5000"
     environment:
       SECRET_KEY: ${SECRET_KEY:-}
+      SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-60}
+      SESSION_CLEANUP_INTERVAL_SECONDS: ${SESSION_CLEANUP_INTERVAL_SECONDS:-300}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      SESSION_CLEANUP_ENABLED: ${SESSION_CLEANUP_ENABLED:-true}
     volumes:
-      - ./data/uploads:/data/uploads
-      - ./data/exports:/data/exports
+      - ./data:/data
