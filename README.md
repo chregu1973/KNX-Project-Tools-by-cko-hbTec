@@ -1,6 +1,6 @@
 # KNX Label Creator V2
 
-**Version:** 2.1.1  
+**Version:** 2.1.2
 **Autor:** Christian Köppen  
 **Unternehmen:** hbTec AG
 
