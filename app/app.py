@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
 from pathlib import Path
 import os
 import re
 import secrets
+import threading
+import time
 import uuid
 
 from core.knx_project import KNXProjectParser
@@ -13,18 +15,114 @@ from core.xml_reader import (
     ProjectPasswordRequired,
 )
 from exporters.csv_export import export_devices
-from datetime import datetime
+from datetime import datetime, timedelta
 from exporters.ptouch_export import export_ptouch
 from exporters.ptouch_project import export_ptouch_project, ptouch_download_name
 from exporters.label_pdf import export_packaging_labels
 from exporters.dymo_export import dymo_download_name, export_dymo_csv, export_dymo_pdf
 
-UPLOAD_FOLDER = "/data/uploads"
+DATA_ROOT = Path(os.environ.get("DATA_ROOT", "/data"))
+
+
+def environment_integer(name, default, minimum=1, maximum=None):
+    try:
+        value = int(os.environ.get(name, default))
+    except (TypeError, ValueError):
+        value = default
+
+    value = max(minimum, value)
+    if maximum is not None:
+        value = min(maximum, value)
+    return value
+
+
+def environment_boolean(name, default=False):
+    raw_value = os.environ.get(name)
+    if raw_value is None:
+        return default
+    return raw_value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+SESSION_TTL_MINUTES = environment_integer(
+    "SESSION_TTL_MINUTES",
+    default=60,
+    minimum=10,
+    maximum=24 * 60,
+)
+SESSION_CLEANUP_INTERVAL_SECONDS = environment_integer(
+    "SESSION_CLEANUP_INTERVAL_SECONDS",
+    default=300,
+    minimum=30,
+    maximum=3600,
+)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config.update(
+    DATA_ROOT=DATA_ROOT,
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=SESSION_TTL_MINUTES),
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=environment_boolean("SESSION_COOKIE_SECURE", False),
+    SESSION_COOKIE_NAME="cko_knx_label_session",
+)
+
+
+def current_session_id():
+    session_id = session.get("session_id")
+    if not ProjectManager.is_valid_session_id(session_id):
+        session_id = secrets.token_urlsafe(32)
+        session["session_id"] = session_id
+
+    session.permanent = True
+    return session_id
+
+
+@app.before_request
+def prepare_user_session():
+    if request.endpoint == "static":
+        return None
+
+    ProjectManager.touch(current_session_id())
+    return None
+
+
+@app.context_processor
+def session_privacy_context():
+    return {"session_ttl_minutes": SESSION_TTL_MINUTES}
+
+
+def cleanup_session_loop():
+    max_age_seconds = SESSION_TTL_MINUTES * 60
+
+    while True:
+        try:
+            removed_sessions = ProjectManager.cleanup_expired(max_age_seconds)
+            if removed_sessions:
+                app.logger.info(
+                    "%d abgelaufene Sitzung(en) automatisch gelöscht.",
+                    len(removed_sessions),
+                )
+        except Exception:
+            app.logger.exception("Automatische Sitzungsbereinigung fehlgeschlagen.")
+
+        time.sleep(SESSION_CLEANUP_INTERVAL_SECONDS)
+
+
+def start_session_cleanup():
+    if not environment_boolean("SESSION_CLEANUP_ENABLED", True):
+        return
+
+    cleanup_thread = threading.Thread(
+        target=cleanup_session_loop,
+        name="knx-session-cleanup",
+        daemon=True,
+    )
+    cleanup_thread.start()
+
+
+start_session_cleanup()
 
 
 
@@ -53,7 +151,7 @@ def build_export_name(project, export_type, extension):
 @app.route("/")
 def index():
 
-    project = ProjectManager.load()
+    project = ProjectManager.load(current_session_id())
 
     manufacturers = {}
 
@@ -71,7 +169,7 @@ def index():
 @app.route("/addresses")
 def addresses():
 
-    project = ProjectManager.load()
+    project = ProjectManager.load(current_session_id())
 
     return render_template(
         "addresses.html",
@@ -81,7 +179,7 @@ def addresses():
 @app.route("/ptouch")
 def ptouch():
 
-    project = ProjectManager.load()
+    project = ProjectManager.load(current_session_id())
 
     return render_template(
         "ptouch.html",
@@ -93,7 +191,7 @@ def ptouch():
 
 @app.route("/dymo")
 def dymo():
-    project = ProjectManager.load()
+    project = ProjectManager.load(current_session_id())
     return render_template("dymo.html", project=project)
 
 
@@ -105,7 +203,7 @@ def label_options():
 @app.route("/labels")
 def labels():
 
-    project = ProjectManager.load()
+    project = ProjectManager.load(current_session_id())
 
     return render_template(
         "labels.html",
@@ -114,7 +212,8 @@ def labels():
 @app.route("/export/labels-pdf", methods=["POST"])
 def export_labels_pdf():
 
-    project = ProjectManager.load()
+    session_id = current_session_id()
+    project = ProjectManager.load(session_id)
 
     if project is None:
         flash("Kein Projekt geladen.")
@@ -151,8 +250,7 @@ def export_labels_pdf():
             flash("Die ausgewählte Logo-Datei konnte nicht gelesen werden.")
             return redirect(url_for("labels"))
 
-    os.makedirs("/data/exports", exist_ok=True)
-    filename = "/data/exports/verpackungsetiketten.pdf"
+    filename = str(ProjectManager.export_path(session_id, "verpackungsetiketten.pdf"))
 
     export_packaging_labels(
         project,
@@ -187,7 +285,8 @@ def export_labels_pdf():
 
 @app.route("/export/ptouch", methods=["POST"])
 def export_ptouch_csv():
-    project = ProjectManager.load()
+    session_id = current_session_id()
+    project = ProjectManager.load(session_id)
 
     if project is None:
         flash("Kein Projekt geladen.")
@@ -201,8 +300,7 @@ def export_ptouch_csv():
     prefix = request.form.get("prefix", "Firma XY | IBS").strip()
     date = request.form.get("date", datetime.now().strftime("%m-%Y")).strip()
 
-    os.makedirs("/data/exports", exist_ok=True)
-    filename = "/data/exports/brother_ptouch.csv"
+    filename = str(ProjectManager.export_path(session_id, "brother_ptouch.csv"))
 
     export_ptouch(
         project,
@@ -221,7 +319,8 @@ def export_ptouch_csv():
 
 @app.route("/export/ptouch-project", methods=["POST"])
 def export_ptouch_project_file():
-    project = ProjectManager.load()
+    session_id = current_session_id()
+    project = ProjectManager.load(session_id)
 
     if project is None:
         flash("Kein Projekt geladen.")
@@ -235,9 +334,8 @@ def export_ptouch_project_file():
     prefix = request.form.get("prefix", "Firma XY | IBS").strip()
     date = request.form.get("date", datetime.now().strftime("%m-%Y")).strip()
 
-    os.makedirs("/data/exports", exist_ok=True)
     template_filename = Path(app.root_path) / "assets" / "ptouch_6mm_template.lbxs"
-    filename = "/data/exports/brother_ptouch.lbxs"
+    filename = str(ProjectManager.export_path(session_id, "brother_ptouch.lbxs"))
 
     try:
         export_ptouch_project(
@@ -262,7 +360,8 @@ def export_ptouch_project_file():
 
 @app.route("/export/dymo-pdf", methods=["POST"])
 def export_dymo_pdf_file():
-    project = ProjectManager.load()
+    session_id = current_session_id()
+    project = ProjectManager.load(session_id)
 
     if project is None:
         flash("Kein Projekt geladen.")
@@ -302,8 +401,7 @@ def export_dymo_pdf_file():
             flash("Die ausgewählte Logo-Datei konnte nicht gelesen werden.")
             return redirect(url_for("dymo"))
 
-    os.makedirs("/data/exports", exist_ok=True)
-    filename = "/data/exports/dymo_11354.pdf"
+    filename = str(ProjectManager.export_path(session_id, "dymo_11354.pdf"))
 
     try:
         export_dymo_pdf(
@@ -330,7 +428,8 @@ def export_dymo_pdf_file():
 
 @app.route("/export/dymo-csv", methods=["POST"])
 def export_dymo_csv_file():
-    project = ProjectManager.load()
+    session_id = current_session_id()
+    project = ProjectManager.load(session_id)
 
     if project is None:
         flash("Kein Projekt geladen.")
@@ -341,8 +440,7 @@ def export_dymo_csv_file():
         flash("Bitte mindestens ein Gerät für den DYMO-Export auswählen.")
         return redirect(url_for("dymo"))
 
-    os.makedirs("/data/exports", exist_ok=True)
-    filename = "/data/exports/dymo_11354.csv"
+    filename = str(ProjectManager.export_path(session_id, "dymo_11354.csv"))
 
     export_dymo_csv(
         project,
@@ -360,15 +458,14 @@ def export_dymo_csv_file():
 @app.route("/export/csv")
 def export_csv():
 
-    project = ProjectManager.load()
+    session_id = current_session_id()
+    project = ProjectManager.load(session_id)
 
     if project is None:
         flash("Kein Projekt geladen.")
         return redirect(url_for("index"))
 
-    os.makedirs("/data/exports", exist_ok=True)
-
-    filename = "/data/exports/Physikalische_Adressen.csv"
+    filename = str(ProjectManager.export_path(session_id, "Physikalische_Adressen.csv"))
 
     export_devices(project, filename)
 
@@ -384,20 +481,7 @@ def delete_project():
     """Entfernt das aktuell geladene Projekt und daraus erzeugte Downloads."""
 
     try:
-        ProjectManager.clear()
-
-        data_directories = (
-            Path(app.config["UPLOAD_FOLDER"]),
-            Path("/data/exports"),
-        )
-
-        for directory in data_directories:
-            if not directory.exists():
-                continue
-
-            for stored_file in directory.iterdir():
-                if stored_file.is_file():
-                    stored_file.unlink()
+        ProjectManager.clear(current_session_id())
 
     except OSError:
         app.logger.exception("Projekt konnte nicht vollständig gelöscht werden.")
@@ -422,11 +506,11 @@ def upload():
         flash("Bitte eine ETS Projektdatei auswählen.")
         return redirect(url_for("index"))
 
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
+    session_id = current_session_id()
+    upload_directory = ProjectManager.upload_dir(session_id)
     original_filename = Path(file.filename).name
     password = request.form.get("project_password", "")
-    pending_path = Path(UPLOAD_FOLDER) / f".upload-{uuid.uuid4().hex}.knxproj"
+    pending_path = upload_directory / f".upload-{uuid.uuid4().hex}.knxproj"
 
     try:
         file.save(pending_path)
@@ -458,18 +542,19 @@ def upload():
         flash("Im ETS-Projekt wurden keine adressierten KNX-Geräte gefunden.")
         return redirect(url_for("index"))
 
-    current_path = Path(UPLOAD_FOLDER) / "current.knxproj"
+    current_path = upload_directory / "current.knxproj"
 
-    for old_file in Path(UPLOAD_FOLDER).glob("*.knxproj"):
+    for old_file in upload_directory.glob("*.knxproj"):
         if old_file != pending_path:
             old_file.unlink()
 
     pending_path.replace(current_path)
+    ProjectManager.clear_exports(session_id)
 
     # Originalen Dateinamen für spätere Exporte beibehalten
     project.filename = original_filename
 
-    ProjectManager.save(project)
+    ProjectManager.save(session_id, project)
 
     flash("Projekt erfolgreich geladen.")
 
@@ -478,10 +563,10 @@ def upload():
 
 if __name__ == "__main__":
 
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    DATA_ROOT.mkdir(parents=True, exist_ok=True)
 
     app.run(
         host="0.0.0.0",
         port=5000,
-        debug=True
+        debug=environment_boolean("FLASK_DEBUG", False)
     )
