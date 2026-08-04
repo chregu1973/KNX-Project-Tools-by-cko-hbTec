@@ -586,33 +586,65 @@ body.light .lc-tool-card p {
 
 /* Datenschutz-Hinweis V2 */
 .lc-privacy-card {
+    position: relative;
+    overflow: hidden;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    gap: 15px;
+    gap: 18px;
     align-items: center;
     margin: -12px 0 30px;
-    padding: 16px 18px;
+    padding: 19px 22px 19px 25px;
     color: var(--text, #e5edf7);
     background:
+        radial-gradient(
+            circle at 0 50%,
+            rgba(18, 214, 109, .14),
+            transparent 34%
+        ),
         linear-gradient(
             90deg,
-            rgba(18, 214, 109, .07),
-            rgba(10, 24, 43, .70)
+            rgba(18, 214, 109, .085),
+            rgba(10, 24, 43, .78)
         );
-    border: 1px solid rgba(18, 214, 109, .23);
-    border-radius: 12px;
+    border: 1px solid rgba(18, 214, 109, .42);
+    border-radius: 13px;
+    box-shadow:
+        0 0 0 1px rgba(18, 214, 109, .06),
+        0 14px 34px rgba(2, 6, 23, .24),
+        inset 0 0 28px rgba(18, 214, 109, .025);
+}
+
+.lc-privacy-card::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: #12d66d;
+    box-shadow: 0 0 18px rgba(18, 214, 109, .7);
+    content: "";
 }
 
 .lc-privacy-icon {
-    width: 42px;
-    height: 42px;
+    width: 52px;
+    height: 52px;
     display: grid;
     place-items: center;
     color: #12d66d;
-    background: rgba(18, 214, 109, .10);
-    border: 1px solid rgba(18, 214, 109, .25);
-    border-radius: 10px;
-    font-size: 21px;
+    background: rgba(18, 214, 109, .12);
+    border: 1px solid rgba(18, 214, 109, .42);
+    border-radius: 14px;
+    box-shadow:
+        0 0 18px rgba(18, 214, 109, .12),
+        inset 0 0 16px rgba(18, 214, 109, .06);
+}
+
+.lc-privacy-icon svg {
+    width: 29px;
+    height: 29px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .lc-privacy-title {
@@ -623,47 +655,78 @@ body.light .lc-tool-card p {
 }
 
 .lc-privacy-title strong {
-    font-size: 13px;
+    color: #dffbea;
+    font-size: 15px;
+    letter-spacing: .01em;
 }
 
 .lc-privacy-title span {
-    padding: 5px 8px;
-    color: #fbbf24;
-    background: rgba(251, 191, 36, .08);
-    border: 1px solid rgba(251, 191, 36, .24);
-    border-radius: 8px;
-    font-size: 9px;
+    padding: 6px 10px;
+    color: #67eea3;
+    background: rgba(18, 214, 109, .11);
+    border: 1px solid rgba(18, 214, 109, .34);
+    border-radius: 999px;
+    box-shadow: inset 0 0 12px rgba(18, 214, 109, .035);
+    font-size: 10px;
     font-weight: 800;
+    letter-spacing: .045em;
     text-transform: uppercase;
     white-space: nowrap;
 }
 
 .lc-privacy-content p {
     max-width: 900px;
-    margin: 7px 0 0;
-    color: var(--muted, #94a3b8);
-    font-size: 11px;
-    line-height: 1.55;
+    margin: 8px 0 0;
+    color: #a9bacd;
+    font-size: 12px;
+    line-height: 1.6;
 }
 
 body.light .lc-privacy-card {
     background:
+        radial-gradient(
+            circle at 0 50%,
+            rgba(18, 160, 88, .11),
+            transparent 34%
+        ),
         linear-gradient(
             90deg,
-            rgba(18, 214, 109, .07),
+            rgba(18, 160, 88, .065),
             rgba(255, 255, 255, .94)
         );
+    border-color: rgba(18, 160, 88, .38);
+}
+
+body.light .lc-privacy-title strong {
+    color: #11633a;
+}
+
+body.light .lc-privacy-content p {
+    color: #526174;
 }
 
 @media (max-width: 620px) {
     .lc-privacy-card {
         align-items: start;
+        gap: 14px;
+        padding: 17px 17px 17px 21px;
+    }
+
+    .lc-privacy-icon {
+        width: 46px;
+        height: 46px;
     }
 
     .lc-privacy-title {
         align-items: flex-start;
         flex-direction: column;
         gap: 7px;
+    }
+}
+
+@media (max-width: 460px) {
+    .lc-privacy-card {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
