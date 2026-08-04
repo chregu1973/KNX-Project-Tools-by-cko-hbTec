@@ -7,6 +7,11 @@ import uuid
 
 from core.knx_project import KNXProjectParser
 from core.project_manager import ProjectManager
+from core.xml_reader import (
+    InvalidKNXProject,
+    InvalidProjectPassword,
+    ProjectPasswordRequired,
+)
 from exporters.csv_export import export_devices
 from datetime import datetime
 from exporters.ptouch_export import export_ptouch
@@ -420,19 +425,46 @@ def upload():
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
     original_filename = Path(file.filename).name
+    password = request.form.get("project_password", "")
+    pending_path = Path(UPLOAD_FOLDER) / f".upload-{uuid.uuid4().hex}.knxproj"
+
+    try:
+        file.save(pending_path)
+        parser = KNXProjectParser(pending_path, password=password)
+        project = parser.load()
+    except ProjectPasswordRequired as error:
+        pending_path.unlink(missing_ok=True)
+        flash(str(error))
+        return redirect(url_for("index"))
+    except InvalidProjectPassword as error:
+        pending_path.unlink(missing_ok=True)
+        flash(str(error))
+        return redirect(url_for("index"))
+    except InvalidKNXProject as error:
+        pending_path.unlink(missing_ok=True)
+        flash(str(error))
+        return redirect(url_for("index"))
+    except Exception:
+        pending_path.unlink(missing_ok=True)
+        app.logger.exception("ETS-Projekt konnte nicht eingelesen werden.")
+        flash("Das ETS-Projekt konnte nicht eingelesen werden.")
+        return redirect(url_for("index"))
+    finally:
+        # Das Klartext-Passwort wird nicht in Session, Cache oder Datei abgelegt.
+        password = None
+
+    if not project.devices:
+        pending_path.unlink(missing_ok=True)
+        flash("Im ETS-Projekt wurden keine adressierten KNX-Geräte gefunden.")
+        return redirect(url_for("index"))
+
+    current_path = Path(UPLOAD_FOLDER) / "current.knxproj"
 
     for old_file in Path(UPLOAD_FOLDER).glob("*.knxproj"):
-        old_file.unlink()
+        if old_file != pending_path:
+            old_file.unlink()
 
-    filename = "current.knxproj"
-
-    path = Path(UPLOAD_FOLDER) / filename
-
-    file.save(path)
-
-    parser = KNXProjectParser(path)
-
-    project = parser.load()
+    pending_path.replace(current_path)
 
     # Originalen Dateinamen für spätere Exporte beibehalten
     project.filename = original_filename
