@@ -1,6 +1,6 @@
 # KNX Label Creator V2
 
-**Version:** 2.0.0  
+**Version:** 2.0.1  
 **Autor:** Christian Köppen  
 **Unternehmen:** hbTec AG
 
@@ -9,6 +9,7 @@ KNX Label Creator ist eine webbasierte Anwendung, die physikalische Adressen und
 ## Funktionen
 
 - ETS5- und ETS6-Projekte bis 500 MB einlesen
+- passwortgeschützte ETS-Projekte einlesen, ohne das Passwort zu speichern
 - Projektübersicht und Liste aller physikalischen Adressen
 - vollständiger CSV-Export der Geräteliste
 - Geräte nach Bereich, Linie und Suchtext auswählen
@@ -51,7 +52,7 @@ Das DYMO-PDF verwendet pro Seite exakt 57 × 32 mm. Im Druckdialog muss **Tatsä
 
 - ETS-Projekte und Exporte liegen ausschließlich in den Docker-Volumes unter `data/` und werden nicht in Git aufgenommen.
 - Über **Projekt löschen / Neues Projekt** werden das aktuelle Projekt, der Cache und die erzeugten Exporte entfernt.
-- Version 2.0.0 verwaltet noch genau ein aktives Projekt pro Installation. Sie ist deshalb für eine eigene Installation beziehungsweise einen kontrollierten Testserver ausgelegt, nicht für einen öffentlichen Mehrbenutzerbetrieb.
+- Version 2.0.1 verwaltet noch genau ein aktives Projekt pro Installation. Sie ist deshalb für eine eigene Installation beziehungsweise einen kontrollierten Testserver ausgelegt, nicht für einen öffentlichen Mehrbenutzerbetrieb.
 - Eine automatische, sitzungsbezogene Löschung ist für eine spätere Version vorgesehen.
 
 Für einen dauerhaft stabilen Flask-Sitzungsschlüssel kann beim Containerstart die Umgebungsvariable `SECRET_KEY` gesetzt werden. Ohne diese Variable erzeugt die Anwendung bei jedem Containerstart einen neuen zufälligen Schlüssel.
